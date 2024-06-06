@@ -5,19 +5,25 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
-import kotlinx.cinterop.*
-import platform.AVFoundation.*
-import platform.CoreServices.kUTTypeJPEG
-import platform.CoreServices.kUTTypePNG
-import platform.Foundation.*
-import platform.darwin.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.AVFoundation.AVCaptureAudioFileOutput
+import platform.AVFoundation.AVCaptureDevice
+import platform.AVFoundation.AVCaptureDeviceInput
+import platform.AVFoundation.AVCaptureFileOutput
+import platform.AVFoundation.AVCaptureFileOutputRecordingDelegateProtocol
+import platform.AVFoundation.AVCaptureSession
+import platform.AVFoundation.AVFileTypeMPEG4
+import platform.AVFoundation.AVFileTypeWAVE
+import platform.AVFoundation.AVMediaTypeAudio
+import platform.Foundation.NSError
+import platform.Foundation.NSURL
+import platform.darwin.NSObject
 import platform.posix.sleep
 
 @OptIn(ExperimentalForeignApi::class)
 class MicCommand : CliktCommand() {
-    private val fileName : String by argument()
-    private val format by option().choice("m4a", "wav")
-        .default("m4a")
+    private val fileName: String by argument()
+    private val format by option().choice("m4a", "wav").default("m4a")
 
     override fun run() {
         val outFormat = when (format) {
@@ -54,7 +60,7 @@ class MicCommand : CliktCommand() {
                 captureOutput: AVCaptureFileOutput,
                 didFinishRecordingToOutputFileAtURL: NSURL,
                 fromConnections: List<*>,
-                error: NSError?
+                error: NSError?,
             ) {
                 println("Recording finished")
             }
@@ -62,7 +68,7 @@ class MicCommand : CliktCommand() {
             override fun captureOutput(
                 output: AVCaptureFileOutput,
                 didPauseRecordingToOutputFileAtURL: NSURL,
-                fromConnections: List<*>
+                fromConnections: List<*>,
             ) {
                 println("Recording started $didPauseRecordingToOutputFileAtURL")
             }

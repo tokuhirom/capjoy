@@ -1,18 +1,15 @@
 package capjoy.command
 
 import capjoy.handleContent
-import capjoy.model.Application
 import capjoy.model.Applications
-import capjoy.model.Displays
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
 import kotlinx.cinterop.BetaInteropApi
-import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import platform.ScreenCaptureKit.SCRunningApplication
 
-class ApplicationsCommand: CliktCommand() {
+class ApplicationsCommand : CliktCommand() {
     private val json = Json {
         prettyPrint = true
     }
@@ -29,4 +26,3 @@ class ApplicationsCommand: CliktCommand() {
         }
     }
 }
-

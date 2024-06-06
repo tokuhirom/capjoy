@@ -6,7 +6,6 @@ import capjoy.command.MicCommand
 import capjoy.command.WindowsCommand
 import com.github.ajalt.clikt.core.subcommands
 
-
 fun main(args: Array<String>) {
     Capjoy().subcommands(
         DisplaysCommand(),

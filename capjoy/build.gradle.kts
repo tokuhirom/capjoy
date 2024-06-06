@@ -1,7 +1,7 @@
-import org.jetbrains.kotlin.backend.common.push
-
 plugins {
     kotlin("multiplatform") version "2.0.0"
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 kotlin {
@@ -27,6 +27,5 @@ tasks.register<Exec>("runDebug") {
     dependsOn("linkDebugExecutableNative")
     val arguments = project.findProperty("execArgs")?.toString()?.split(" ") ?: listOf()
     args(arguments)
-    executable = file("${buildDir}/bin/native/debugExecutable/capjoy.kexe").absolutePath
+    executable = file("$buildDir/bin/native/debugExecutable/capjoy.kexe").absolutePath
 }
-

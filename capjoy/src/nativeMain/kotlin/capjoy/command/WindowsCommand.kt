@@ -1,23 +1,17 @@
 package capjoy.command
 
 import capjoy.handleContent
-import capjoy.model.Display
-import capjoy.model.Displays
-import capjoy.model.Rect
 import capjoy.model.Window
 import capjoy.model.Windows
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
 import kotlinx.cinterop.BetaInteropApi
-import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import platform.CoreGraphics.CGRect
-import platform.ScreenCaptureKit.SCDisplay
 import platform.ScreenCaptureKit.SCWindow
 
-class WindowsCommand: CliktCommand() {
+class WindowsCommand : CliktCommand() {
     private val json = Json {
         prettyPrint = true
     }
@@ -43,4 +37,3 @@ class WindowsCommand: CliktCommand() {
         }
     }
 }
-

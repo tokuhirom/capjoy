@@ -27,18 +27,20 @@ import platform.ImageIO.CGImageDestinationCreateWithURL
 import platform.ImageIO.CGImageDestinationFinalize
 
 class ImageCommand : CliktCommand() {
-    private val windowID : Long by argument().long()
-    private val path : String by argument()
+    private val windowID: Long by argument().long()
+    private val path: String by argument()
     private val format by option().choice("png", "jpg")
         .default("png")
 
     @OptIn(ExperimentalForeignApi::class)
     override fun run() {
-        captureWindow(windowID.convert(), path, when (format) {
-            "png" -> kUTTypePNG
-            "jpg" -> kUTTypeJPEG
-            else -> error("Unsupported format: $format")
-        })
+        captureWindow(
+            windowID.convert(), path, when (format) {
+                "png" -> kUTTypePNG
+                "jpg" -> kUTTypeJPEG
+                else -> error("Unsupported format: $format")
+            }
+        )
     }
 
     @OptIn(ExperimentalForeignApi::class)
@@ -47,16 +49,17 @@ class ImageCommand : CliktCommand() {
             CGRectNull.readValue(),
             kCGWindowListOptionIncludingWindow,
             windowID,
-            kCGWindowImageDefault
+            kCGWindowImageDefault,
         )
 
         if (image != null) {
-            val filePathCFString = CFStringCreateWithCString(kCFAllocatorDefault, filePath, kCFStringEncodingUTF8)
+            val filePathCFString =
+                CFStringCreateWithCString(kCFAllocatorDefault, filePath, kCFStringEncodingUTF8)
             val url = CFURLCreateWithFileSystemPath(
                 kCFAllocatorDefault,
                 filePathCFString,
                 kCFURLPOSIXPathStyle,
-                false
+                false,
             )
 
             val destination = CGImageDestinationCreateWithURL(url, imageFormat, 1.convert(), null)

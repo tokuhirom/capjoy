@@ -7,7 +7,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreGraphics.CGRect
 import platform.ScreenCaptureKit.SCRunningApplication
 
-fun SCRunningApplication.toModel() : Application {
+fun SCRunningApplication.toModel(): Application {
     return Application(
         applicationName = this.applicationName,
         bundleIdentifier = this.bundleIdentifier,

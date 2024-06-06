@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Applications(
-    val applications: List<Application>
+    val applications: List<Application>,
 )

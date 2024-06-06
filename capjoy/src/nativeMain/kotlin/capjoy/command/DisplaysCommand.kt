@@ -11,7 +11,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import platform.ScreenCaptureKit.SCDisplay
 
-class DisplaysCommand: CliktCommand() {
+class DisplaysCommand : CliktCommand() {
     private val json = Json {
         prettyPrint = true
     }
