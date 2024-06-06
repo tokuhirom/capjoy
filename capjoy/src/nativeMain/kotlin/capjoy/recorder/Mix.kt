@@ -27,7 +27,7 @@ fun mix(inputFileNames: List<String>, outputFileName: String) {
 
     val composition = AVMutableComposition()
 
-    audioFiles.forEachIndexed { index, fileURL ->
+    audioFiles.forEachIndexed { _, fileURL ->
         val asset = AVURLAsset(fileURL, options = null)
         val assetTrack: AVAssetTrack? =
             asset.tracksWithMediaType(AVMediaTypeAudio).firstOrNull() as AVAssetTrack?
