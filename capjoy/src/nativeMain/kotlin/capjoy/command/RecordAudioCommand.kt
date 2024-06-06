@@ -2,6 +2,7 @@ package capjoy.command
 
 import capjoy.eprintln
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.arguments.argument
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.memScoped
 import platform.AVFAudio.AVEncoderBitRateKey
@@ -16,7 +17,6 @@ import platform.CoreAudioTypes.kAudioFormatMPEG4AAC
 import platform.CoreMedia.CMSampleBufferIsValid
 import platform.CoreMedia.CMSampleBufferRef
 import platform.CoreMedia.CMTimeMake
-import platform.Foundation.NSHomeDirectory
 import platform.Foundation.NSRunLoop
 import platform.Foundation.NSURL
 import platform.Foundation.run
@@ -33,9 +33,10 @@ import platform.posix.sleep
 
 @OptIn(ExperimentalForeignApi::class)
 class RecordAudioCommand : CliktCommand() {
+    private val fileName: String by argument()
+
     override fun run() {
         memScoped {
-            // Screencapturekitのセットアップ
             val captureConfiguration = SCStreamConfiguration().apply {
                 showsCursor = false
                 capturesAudio = true
@@ -57,7 +58,7 @@ class RecordAudioCommand : CliktCommand() {
                 val stream = SCStream(contentFilter, captureConfiguration, null)
 
                 // 出力ファイルパスを確認
-                val outputFileURL = NSURL.fileURLWithPath("${NSHomeDirectory()}/output.m4a")
+                val outputFileURL = NSURL.fileURLWithPath(fileName)
                 println("Output file: ${outputFileURL.path}")
 
                 // AssetWriterの設定
@@ -115,8 +116,6 @@ class RecordAudioCommand : CliktCommand() {
                     println("Capture started")
 
                     println("Recording... Press ENTER to stop.")
-                    // Uncomment this line if you want to stop recording manually by pressing ENTER
-                    // readLine()
 
                     sleep(10u)
                     println("Sleeped...")
