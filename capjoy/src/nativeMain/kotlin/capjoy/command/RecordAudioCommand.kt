@@ -11,12 +11,12 @@ import platform.AVFAudio.AVSampleRateKey
 import platform.AVFoundation.AVAssetWriter
 import platform.AVFoundation.AVAssetWriterInput
 import platform.AVFoundation.AVFileTypeAppleM4A
-import platform.AVFoundation.AVMediaType
 import platform.AVFoundation.AVMediaTypeAudio
 import platform.CoreAudioTypes.kAudioFormatMPEG4AAC
 import platform.CoreMedia.CMSampleBufferIsValid
 import platform.CoreMedia.CMSampleBufferRef
 import platform.CoreMedia.CMTimeMake
+import platform.Foundation.NSHomeDirectory
 import platform.Foundation.NSRunLoop
 import platform.Foundation.NSURL
 import platform.Foundation.run
@@ -47,7 +47,7 @@ class RecordAudioCommand : CliktCommand() {
                     return@getShareableContentWithCompletionHandler
                 }
 
-                val display: SCDisplay? = content?.displays?.firstOrNull() as SCDisplay?
+                val display: SCDisplay? = content?.displays?.firstOrNull() as? SCDisplay
                 if (display == null) {
                     println("No display found")
                     return@getShareableContentWithCompletionHandler
@@ -56,19 +56,23 @@ class RecordAudioCommand : CliktCommand() {
                 val contentFilter = SCContentFilter(display, excludingWindows = emptyList<Any>())
                 val stream = SCStream(contentFilter, captureConfiguration, null)
 
-                val outputFileURL = NSURL.fileURLWithPath("/tmp/output.m4a")
-                val assetWriter = AVAssetWriter(outputFileURL, fileType = AVFileTypeAppleM4A, error = null)
-                val audioSettings: Map<Any?, *> = mapOf(
+                // 出力ファイルパスを確認
+                val outputFileURL = NSURL.fileURLWithPath("${NSHomeDirectory()}/output.m4a")
+                println("Output file: ${outputFileURL.path}")
+
+                // AssetWriterの設定
+                val assetWriter =
+                    AVAssetWriter(outputFileURL, fileType = AVFileTypeAppleM4A, error = null)
+                val audioSettings = mapOf<Any?, Any?>(
                     AVFormatIDKey to kAudioFormatMPEG4AAC,
                     AVNumberOfChannelsKey to 1,
                     AVSampleRateKey to 44100.0,
                     AVEncoderBitRateKey to 64000
                 )
-                val mediaType: AVMediaType? = AVMediaTypeAudio
                 val assetWriterInput = AVAssetWriterInput(
-                    mediaType = mediaType,
+                    mediaType = AVMediaTypeAudio,
                     outputSettings = audioSettings,
-                    sourceFormatHint = null,
+                    sourceFormatHint = null
                 )
                 assetWriter.addInput(assetWriterInput)
 
@@ -89,9 +93,6 @@ class RecordAudioCommand : CliktCommand() {
                             eprintln("Invalid sample buffer")
                             return
                         }
-
-                        // Handle the sample buffer, e.g., write to file
-                        println("Sample buffer received $ofType")
 
                         if (assetWriterInput.readyForMoreMediaData) {
                             assetWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)
