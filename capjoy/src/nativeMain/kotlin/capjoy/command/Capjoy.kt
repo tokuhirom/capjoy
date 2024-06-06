@@ -1,4 +1,4 @@
-package command
+package capjoy.command
 
 import com.github.ajalt.clikt.core.CliktCommand
 

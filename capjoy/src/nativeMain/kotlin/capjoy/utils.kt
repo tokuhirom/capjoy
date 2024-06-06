@@ -1,3 +1,6 @@
+package capjoy
+
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.autoreleasepool
 import platform.CoreFoundation.CFRunLoopRun
@@ -12,6 +15,7 @@ fun eprintln(message: String) {
     fprintf(stderr, "%s\n", message)
 }
 
+@BetaInteropApi
 fun handleContent(callback: (SCShareableContent) -> Unit) {
     autoreleasepool {
         SCShareableContent.getShareableContentWithCompletionHandler { content: SCShareableContent?, error ->

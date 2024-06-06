@@ -1,10 +1,10 @@
-package command
+package capjoy.command
 
+import capjoy.handleContent
 import capjoy.model.Display
 import capjoy.model.Displays
 import capjoy.model.Rect
 import com.github.ajalt.clikt.core.CliktCommand
-import handleContent
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.serialization.encodeToString

@@ -15,11 +15,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation("com.github.ajalt.clikt:clikt:4.4.0")
-            }
-        }
-        nativeMain {
-            dependencies {
-                implementation(project(":capjoy-core"))
+                implementation(project(":capjoy-model"))
             }
         }
     }

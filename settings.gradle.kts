@@ -4,4 +4,4 @@ plugins {
 rootProject.name = "capjoy"
 
 include(":capjoy")
-include(":capjoy-core")
+include(":capjoy-model")
