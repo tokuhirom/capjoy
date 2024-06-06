@@ -16,6 +16,7 @@ kotlin {
             dependencies {
                 implementation("com.github.ajalt.clikt:clikt:4.4.0")
                 implementation(project(":capjoy-model"))
+//                implementation("org.jetbrains.kotlinx:kotlinx-interop:1.8.20")
             }
         }
     }
@@ -28,3 +29,4 @@ tasks.register<Exec>("runDebug") {
     args(arguments)
     executable = file("${buildDir}/bin/native/debugExecutable/capjoy.kexe").absolutePath
 }
+
