@@ -1,5 +1,6 @@
 import capjoy.command.ApplicationsCommand
 import capjoy.command.Capjoy
+import capjoy.command.CaptureDevicesCommand
 import capjoy.command.DisplaysCommand
 import capjoy.command.ImageCommand
 import capjoy.command.MixCommand
@@ -14,6 +15,7 @@ fun main(args: Array<String>) {
         DisplaysCommand(),
         ApplicationsCommand(),
         WindowsCommand(),
+        CaptureDevicesCommand(),
         ImageCommand(),
         RecordMicCommand(),
         RecordAudioCommand(),
