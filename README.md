@@ -1,5 +1,8 @@
 # capjoy
 
+![image](https://github.com/tokuhirom/capjoy/assets/21084/83703ef3-e27d-4d48-a0c1-b0e9ab361d39)
+
+
 ## Description
 
 This is a simple CLI application, that captures image, video, audio from your Mac.
