@@ -45,7 +45,7 @@ fun startScreenRecord(fileName: String, callback: (ScreenRecorder) -> Unit) {
         }
 
         val contentFilter = SCContentFilter(display, excludingWindows = emptyList<Any>())
-        val stream: SCStream = SCStream(contentFilter, captureConfiguration, null)
+        val stream = SCStream(contentFilter, captureConfiguration, null)
 
         // 出力ファイルパスを確認
         val outputFileURL = NSURL.fileURLWithPath(fileName)
