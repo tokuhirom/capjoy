@@ -113,7 +113,7 @@ data class ScreenRecorder(
     val assetWriterInput: AVAssetWriterInput,
     val assetWriter: AVAssetWriter
 ) {
-    fun stop() {
+    fun stop(callback: () -> Unit) {
         stream.stopCaptureWithCompletionHandler { error ->
             if (error != null) {
                 println("Failed to stop capture: ${error.localizedDescription}")
@@ -121,8 +121,7 @@ data class ScreenRecorder(
                 println("Capture stopped")
                 assetWriterInput.markAsFinished()
                 assetWriter.finishWritingWithCompletionHandler {
-                    println("Writing finished")
-                    exit(0)
+                    callback()
                 }
             }
         }

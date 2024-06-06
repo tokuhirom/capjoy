@@ -7,6 +7,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.memScoped
 import platform.Foundation.NSRunLoop
 import platform.Foundation.run
+import platform.posix.exit
 import platform.posix.sleep
 
 @OptIn(ExperimentalForeignApi::class)
@@ -20,7 +21,10 @@ class RecordAudioCommand : CliktCommand() {
                 sleep(10u)
                 println("Sleeped...")
 
-                screenRecorder.stop()
+                screenRecorder.stop {
+                    println("Writing finished")
+                    exit(0)
+                }
             }
         }
 
