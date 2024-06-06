@@ -2,23 +2,23 @@ package capjoy.command
 
 import capjoy.eprintln
 import com.github.ajalt.clikt.core.CliktCommand
-import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.refTo
-import platform.CoreMedia.CMBlockBufferCopyDataBytes
-import platform.CoreMedia.CMBlockBufferGetDataLength
-import platform.CoreMedia.CMSampleBufferGetDataBuffer
+import platform.AVFAudio.AVEncoderBitRateKey
+import platform.AVFAudio.AVFormatIDKey
+import platform.AVFAudio.AVNumberOfChannelsKey
+import platform.AVFAudio.AVSampleRateKey
+import platform.AVFoundation.AVAssetWriter
+import platform.AVFoundation.AVAssetWriterInput
+import platform.AVFoundation.AVFileTypeAppleM4A
+import platform.AVFoundation.AVMediaType
+import platform.AVFoundation.AVMediaTypeAudio
+import platform.CoreAudioTypes.kAudioFormatMPEG4AAC
 import platform.CoreMedia.CMSampleBufferIsValid
 import platform.CoreMedia.CMSampleBufferRef
-import platform.Foundation.NSData
-import platform.Foundation.NSFileHandle
-import platform.Foundation.NSFileManager
+import platform.CoreMedia.CMTimeMake
 import platform.Foundation.NSRunLoop
-import platform.Foundation.closeFile
-import platform.Foundation.create
-import platform.Foundation.fileHandleForWritingAtPath
+import platform.Foundation.NSURL
 import platform.Foundation.run
 import platform.ScreenCaptureKit.SCContentFilter
 import platform.ScreenCaptureKit.SCDisplay
@@ -33,7 +33,6 @@ import platform.posix.sleep
 
 @OptIn(ExperimentalForeignApi::class)
 class RecordAudioCommand : CliktCommand() {
-    @BetaInteropApi
     override fun run() {
         memScoped {
             // Screencapturekitのセットアップ
@@ -56,18 +55,29 @@ class RecordAudioCommand : CliktCommand() {
 
                 val contentFilter = SCContentFilter(display, excludingWindows = emptyList<Any>())
                 val stream = SCStream(contentFilter, captureConfiguration, null)
-                val fileHandle = memScoped {
-                    val file = "/tmp/output.m4a"
-                    if (!NSFileManager.defaultManager.fileExistsAtPath(file)) {
-                        NSFileManager.defaultManager.createFileAtPath(file, null, null)
-                    }
-                    val fileHandle = NSFileHandle.fileHandleForWritingAtPath(file)
-                    if (fileHandle == null) {
-                        println("Failed to create file handle")
-                        exit(1)
-                    }
-                    fileHandle
+
+                val outputFileURL = NSURL.fileURLWithPath("/tmp/output.m4a")
+                val assetWriter = AVAssetWriter(outputFileURL, fileType = AVFileTypeAppleM4A, error = null)
+                val audioSettings: Map<Any?, *> = mapOf(
+                    AVFormatIDKey to kAudioFormatMPEG4AAC,
+                    AVNumberOfChannelsKey to 1,
+                    AVSampleRateKey to 44100.0,
+                    AVEncoderBitRateKey to 64000
+                )
+                val mediaType: AVMediaType? = AVMediaTypeAudio
+                val assetWriterInput = AVAssetWriterInput(
+                    mediaType = mediaType,
+                    outputSettings = audioSettings,
+                    sourceFormatHint = null,
+                )
+                assetWriter.addInput(assetWriterInput)
+
+                if (!assetWriter.startWriting()) {
+                    println("Failed to start writing: ${assetWriter.error?.localizedDescription}")
+                    exit(1)
                 }
+
+                assetWriter.startSessionAtSourceTime(CMTimeMake(value = 0, timescale = 1))
 
                 val streamOutput = object : NSObject(), SCStreamOutputProtocol {
                     override fun stream(
@@ -83,20 +93,8 @@ class RecordAudioCommand : CliktCommand() {
                         // Handle the sample buffer, e.g., write to file
                         println("Sample buffer received $ofType")
 
-                        val blockBufferRef = CMSampleBufferGetDataBuffer(didOutputSampleBuffer)
-                        if (blockBufferRef != null) {
-                            val dataLength = CMBlockBufferGetDataLength(blockBufferRef)
-                            val data = ByteArray(dataLength.convert())
-                            CMBlockBufferCopyDataBytes(blockBufferRef, 0.convert(), dataLength, data.refTo(0))
-                            val nsData = NSData.create(
-                                bytes = data.refTo(0).getPointer(this@memScoped),
-                                length = data.size.convert()
-                            )
-                            println("Writing $nsData to file $fileHandle")
-                            fileHandle?.writeData(
-                                nsData,
-                                null
-                            )
+                        if (assetWriterInput.readyForMoreMediaData) {
+                            assetWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)
                         }
                     }
                 }
@@ -127,10 +125,11 @@ class RecordAudioCommand : CliktCommand() {
                             println("Failed to stop capture: ${error.localizedDescription}")
                         } else {
                             println("Capture stopped")
-
-                            fileHandle?.closeFile()
-
-                            exit(0)
+                            assetWriterInput.markAsFinished()
+                            assetWriter.finishWritingWithCompletionHandler {
+                                println("Writing finished")
+                                exit(0)
+                            }
                         }
                     }
                 }
