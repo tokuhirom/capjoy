@@ -12,6 +12,10 @@ import kotlinx.serialization.json.Json
 import platform.ScreenCaptureKit.SCDisplay
 
 class DisplaysCommand: CliktCommand() {
+    val json = Json {
+        prettyPrint = true
+    }
+
     @OptIn(ExperimentalForeignApi::class)
     @BetaInteropApi
     override fun run() {
@@ -30,7 +34,7 @@ class DisplaysCommand: CliktCommand() {
                     description = it.description,
                 )
             }
-            println(Json.encodeToString(Displays(got)))
+            println(json.encodeToString(Displays(got)))
         }
     }
 }

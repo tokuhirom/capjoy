@@ -4,5 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Application(
-    val name: String,
+    val applicationName: String,
+    val bundleIdentifier: String,
+    val processID: Long,
 )
