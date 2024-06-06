@@ -4,15 +4,20 @@ import capjoy.handleContent
 import capjoy.model.Display
 import capjoy.model.Displays
 import capjoy.model.Rect
+import capjoy.model.Window
+import capjoy.model.Windows
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
 import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import platform.CoreGraphics.CGRect
 import platform.ScreenCaptureKit.SCDisplay
+import platform.ScreenCaptureKit.SCWindow
 
-class DisplaysCommand: CliktCommand() {
+class WindowsCommand: CliktCommand() {
     private val json = Json {
         prettyPrint = true
     }
@@ -21,18 +26,21 @@ class DisplaysCommand: CliktCommand() {
     @BetaInteropApi
     override fun run() {
         handleContent { content ->
-            val got = content.displays.map { display ->
-                display as SCDisplay
+            val got = content.windows.map { window ->
+                window as SCWindow
             }.map {
-                Display(
-                    displayId = it.displayID.toString(),
+                Window(
+                    active = it.active,
                     frame = it.frame.toModel(),
-                    width = it.width.toInt(),
-                    height = it.height.toInt(),
-                    description = it.description,
+                    onScreen = it.onScreen,
+                    owningApplication = it.owningApplication?.toModel(),
+                    title = it.title,
+                    windowID = it.windowID,
+                    windowLayer = it.windowLayer,
                 )
             }
-            println(json.encodeToString(Displays(got)))
+            println(json.encodeToString(Windows(got)))
         }
     }
 }
+

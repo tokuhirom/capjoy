@@ -4,6 +4,7 @@ import capjoy.handleContent
 import capjoy.model.Application
 import capjoy.model.Applications
 import capjoy.model.Displays
+import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -22,13 +23,10 @@ class ApplicationsCommand: CliktCommand() {
             val got = content.applications.map { application ->
                 application as SCRunningApplication
             }.map {
-                Application(
-                    applicationName = it.applicationName,
-                    bundleIdentifier = it.bundleIdentifier,
-                    processID = it.processID.toLong(),
-                )
+                it.toModel()
             }
             println(json.encodeToString(Applications(got)))
         }
     }
 }
+
