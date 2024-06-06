@@ -11,7 +11,7 @@ import platform.AVFoundation.AVFileTypeMPEG4
 import platform.AVFoundation.AVFileTypeWAVE
 import platform.posix.sleep
 
-class MicCommand : CliktCommand() {
+class RecordMicCommand : CliktCommand() {
     private val fileName: String by argument()
     private val format by option().choice("m4a", "wav").default("m4a")
 
