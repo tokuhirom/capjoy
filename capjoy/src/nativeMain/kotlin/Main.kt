@@ -1,6 +1,7 @@
 import capjoy.command.ApplicationsCommand
 import capjoy.command.Capjoy
 import capjoy.command.DisplaysCommand
+import capjoy.command.ImageCommand
 import capjoy.command.WindowsCommand
 import com.github.ajalt.clikt.core.subcommands
 
@@ -10,5 +11,6 @@ fun main(args: Array<String>) {
         DisplaysCommand(),
         ApplicationsCommand(),
         WindowsCommand(),
+        ImageCommand(),
     ).main(args)
 }

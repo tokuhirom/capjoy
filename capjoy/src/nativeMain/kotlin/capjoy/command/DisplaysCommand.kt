@@ -3,7 +3,6 @@ package capjoy.command
 import capjoy.handleContent
 import capjoy.model.Display
 import capjoy.model.Displays
-import capjoy.model.Rect
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
 import kotlinx.cinterop.BetaInteropApi
