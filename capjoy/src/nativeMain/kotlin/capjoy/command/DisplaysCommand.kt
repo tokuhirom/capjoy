@@ -12,25 +12,27 @@ import kotlinx.serialization.json.Json
 import platform.ScreenCaptureKit.SCDisplay
 
 class DisplaysCommand : CliktCommand() {
-    private val json = Json {
-        prettyPrint = true
-    }
+    private val json =
+        Json {
+            prettyPrint = true
+        }
 
     @OptIn(ExperimentalForeignApi::class)
     @BetaInteropApi
     override fun run() {
         handleContent { content ->
-            val got = content.displays.map { display ->
-                display as SCDisplay
-            }.map {
-                Display(
-                    displayId = it.displayID.toString(),
-                    frame = it.frame.toModel(),
-                    width = it.width.toInt(),
-                    height = it.height.toInt(),
-                    description = it.description,
-                )
-            }
+            val got =
+                content.displays.map { display ->
+                    display as SCDisplay
+                }.map {
+                    Display(
+                        displayId = it.displayID.toString(),
+                        frame = it.frame.toModel(),
+                        width = it.width.toInt(),
+                        height = it.height.toInt(),
+                        description = it.description,
+                    )
+                }
             println(json.encodeToString(Displays(got)))
         }
     }

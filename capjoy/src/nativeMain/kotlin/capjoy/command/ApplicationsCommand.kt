@@ -10,18 +10,20 @@ import kotlinx.serialization.json.Json
 import platform.ScreenCaptureKit.SCRunningApplication
 
 class ApplicationsCommand : CliktCommand() {
-    private val json = Json {
-        prettyPrint = true
-    }
+    private val json =
+        Json {
+            prettyPrint = true
+        }
 
     @BetaInteropApi
     override fun run() {
         handleContent { content ->
-            val got = content.applications.map { application ->
-                application as SCRunningApplication
-            }.map {
-                it.toModel()
-            }
+            val got =
+                content.applications.map { application ->
+                    application as SCRunningApplication
+                }.map {
+                    it.toModel()
+                }
             println(json.encodeToString(Applications(got)))
         }
     }

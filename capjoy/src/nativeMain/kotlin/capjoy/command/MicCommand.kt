@@ -26,11 +26,12 @@ class MicCommand : CliktCommand() {
     private val format by option().choice("m4a", "wav").default("m4a")
 
     override fun run() {
-        val outFormat = when (format) {
-            "m4a" -> AVFileTypeMPEG4
-            "wav" -> AVFileTypeWAVE
-            else -> error("Unsupported format: $format")
-        }
+        val outFormat =
+            when (format) {
+                "m4a" -> AVFileTypeMPEG4
+                "wav" -> AVFileTypeWAVE
+                else -> error("Unsupported format: $format")
+            }
 
         val captureSession = AVCaptureSession()
         val audioDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio)
@@ -55,24 +56,25 @@ class MicCommand : CliktCommand() {
 
         captureSession.startRunning()
 
-        val delegate = object : NSObject(), AVCaptureFileOutputRecordingDelegateProtocol {
-            override fun captureOutput(
-                captureOutput: AVCaptureFileOutput,
-                didFinishRecordingToOutputFileAtURL: NSURL,
-                fromConnections: List<*>,
-                error: NSError?,
-            ) {
-                println("Recording finished")
-            }
+        val delegate =
+            object : NSObject(), AVCaptureFileOutputRecordingDelegateProtocol {
+                override fun captureOutput(
+                    captureOutput: AVCaptureFileOutput,
+                    didFinishRecordingToOutputFileAtURL: NSURL,
+                    fromConnections: List<*>,
+                    error: NSError?,
+                ) {
+                    println("Recording finished")
+                }
 
-            override fun captureOutput(
-                output: AVCaptureFileOutput,
-                didPauseRecordingToOutputFileAtURL: NSURL,
-                fromConnections: List<*>,
-            ) {
-                println("Recording started $didPauseRecordingToOutputFileAtURL")
+                override fun captureOutput(
+                    output: AVCaptureFileOutput,
+                    didPauseRecordingToOutputFileAtURL: NSURL,
+                    fromConnections: List<*>,
+                ) {
+                    println("Recording started $didPauseRecordingToOutputFileAtURL")
+                }
             }
-        }
 
         audioOutput.startRecordingToOutputFileURL(outputFileURL, outFormat, delegate)
 
