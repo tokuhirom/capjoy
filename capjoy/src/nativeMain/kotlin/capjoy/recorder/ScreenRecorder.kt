@@ -26,7 +26,10 @@ import platform.darwin.NSObject
 import platform.posix.exit
 
 @OptIn(ExperimentalForeignApi::class)
-fun startScreenRecord(fileName: String, callback: (ScreenRecorder) -> Unit) {
+fun startScreenRecord(
+    fileName: String,
+    callback: (ScreenRecorder) -> Unit,
+) {
     val captureConfiguration = SCStreamConfiguration().apply {
         showsCursor = false
         capturesAudio = true
@@ -58,12 +61,12 @@ fun startScreenRecord(fileName: String, callback: (ScreenRecorder) -> Unit) {
             AVFormatIDKey to kAudioFormatMPEG4AAC,
             AVNumberOfChannelsKey to 1,
             AVSampleRateKey to 44100.0,
-            AVEncoderBitRateKey to 64000
+            AVEncoderBitRateKey to 64000,
         )
         val assetWriterInput = AVAssetWriterInput(
             mediaType = AVMediaTypeAudio,
             outputSettings = audioSettings,
-            sourceFormatHint = null
+            sourceFormatHint = null,
         )
         assetWriter.addInput(assetWriterInput)
 
@@ -78,7 +81,7 @@ fun startScreenRecord(fileName: String, callback: (ScreenRecorder) -> Unit) {
             override fun stream(
                 stream: SCStream,
                 didOutputSampleBuffer: CMSampleBufferRef?,
-                ofType: SCStreamOutputType
+                ofType: SCStreamOutputType,
             ) {
                 if (!CMSampleBufferIsValid(didOutputSampleBuffer)) {
                     eprintln("Invalid sample buffer")
@@ -95,7 +98,7 @@ fun startScreenRecord(fileName: String, callback: (ScreenRecorder) -> Unit) {
             streamOutput,
             SCStreamOutputType.SCStreamOutputTypeAudio,
             sampleHandlerQueue = null,
-            error = null
+            error = null,
         )
 
         stream.startCaptureWithCompletionHandler { error ->
@@ -111,7 +114,7 @@ fun startScreenRecord(fileName: String, callback: (ScreenRecorder) -> Unit) {
 data class ScreenRecorder(
     val stream: SCStream,
     val assetWriterInput: AVAssetWriterInput,
-    val assetWriter: AVAssetWriter
+    val assetWriter: AVAssetWriter,
 ) {
     fun stop(callback: () -> Unit) {
         stream.stopCaptureWithCompletionHandler { error ->

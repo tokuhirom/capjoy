@@ -35,7 +35,7 @@ class CaptureDevicesCommand : CliktCommand() {
                 uniqueID = it.uniqueID,
                 suspended = it.suspended,
                 transportType = it.transportType,
-                modelID = it.modelID
+                modelID = it.modelID,
             )
         }
         println(json.encodeToString(CaptureDevices(got)))

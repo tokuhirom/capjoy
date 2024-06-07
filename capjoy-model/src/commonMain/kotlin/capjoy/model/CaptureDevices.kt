@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CaptureDevices(
-    val devices: List<CaptureDevice>
+    val devices: List<CaptureDevice>,
 )

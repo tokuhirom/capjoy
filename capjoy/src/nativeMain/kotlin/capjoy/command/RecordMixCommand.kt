@@ -13,7 +13,10 @@ import platform.posix.sleep
 import platform.posix.unlink
 import kotlin.random.Random
 
-private fun createTempFile(prefix: String, suffix: String): String {
+private fun createTempFile(
+    prefix: String,
+    suffix: String,
+): String {
     val tempDir = NSTemporaryDirectory()
     val fileName = "$prefix${Random.nextInt()}$suffix"
     val filePath = tempDir + fileName

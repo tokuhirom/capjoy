@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CaptureDeviceFormat(
     val description: String?,
-    val mediaType: String?
+    val mediaType: String?,
 )
 
 @Serializable

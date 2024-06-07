@@ -14,7 +14,10 @@ import platform.Foundation.NSURL
 import platform.darwin.NSObject
 
 @OptIn(ExperimentalForeignApi::class)
-fun startAudioRecording(outFormat: AVFileType, fileName: String): MicRecorder {
+fun startAudioRecording(
+    outFormat: AVFileType,
+    fileName: String,
+): MicRecorder {
     val captureSession = AVCaptureSession()
     val audioDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio)
     val audioInput = AVCaptureDeviceInput.deviceInputWithDevice(audioDevice!!, null)

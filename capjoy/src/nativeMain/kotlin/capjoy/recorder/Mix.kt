@@ -22,7 +22,10 @@ import platform.Foundation.run
 import platform.posix.exit
 
 @OptIn(ExperimentalForeignApi::class)
-fun mix(inputFileNames: List<String>, outputFileName: String) {
+fun mix(
+    inputFileNames: List<String>,
+    outputFileName: String,
+) {
     val audioFiles = inputFileNames.map { NSURL.fileURLWithPath(it) }
 
     val composition = AVMutableComposition()
@@ -34,14 +37,14 @@ fun mix(inputFileNames: List<String>, outputFileName: String) {
         if (assetTrack != null) {
             val compositionTrack = composition.addMutableTrackWithMediaType(
                 mediaType = AVMediaTypeAudio,
-                preferredTrackID = kCMPersistentTrackID_Invalid
+                preferredTrackID = kCMPersistentTrackID_Invalid,
             )
             val timeRange = CMTimeRangeMake(start = CMTimeMake(0, 1), duration = asset.duration)
             compositionTrack?.insertTimeRange(
                 timeRange,
                 ofTrack = assetTrack,
                 atTime = CMTimeMake(0, 1),
-                error = null
+                error = null,
             )
         }
     }

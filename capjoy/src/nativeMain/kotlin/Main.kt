@@ -20,6 +20,6 @@ fun main(args: Array<String>) {
         RecordMicCommand(),
         RecordAudioCommand(),
         MixCommand(),
-        RecordMixCommand()
+        RecordMixCommand(),
     ).main(args)
 }
