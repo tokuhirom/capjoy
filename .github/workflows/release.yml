@@ -1,0 +1,59 @@
+name: Build and Release Kotlin/Native Binary
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Replace version in VersionCommand.kt
+        run: |
+          perl -pi -e 's/__VERSION__/${{ github.event.release.tag_name }}/g' capjoy/src/nativeMain/kotlin/capjoy/command/VersionCommand.kt
+
+      - name: Build Kotlin/Native binary
+        run: ./gradlew build
+
+      - name: Archive the build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: binary
+          path: build/bin/native/releaseExecutable/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: binary
+          path: ./build
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./build/build/bin/native/releaseExecutable/
+          asset_name: my-kotlin-native-binary
+          asset_content_type: application/octet-stream
