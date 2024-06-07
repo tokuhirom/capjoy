@@ -2,14 +2,26 @@
 
 ![image](https://github.com/tokuhirom/capjoy/assets/21084/83703ef3-e27d-4d48-a0c1-b0e9ab361d39)
 
-
 ## Description
 
-This is a simple CLI application, that captures image, video, audio from your Mac.
+This is a simple CLI application, that captures image, video(Not implemented), audio from your Mac.
+
+## Use case
+
+- Record the mic audio to a file
+- Record the screen as a video(Not implemented)
+- Capture the screen as an image
+- Record the audio from the applications and mic. And mix it.
+
+## Install
+
+(TBD: i want to support the homebrew)
 
 ## Usage
 
-TBD
+```shell
+$ capjoy --help
+```
 
 ## LICENSE
 
