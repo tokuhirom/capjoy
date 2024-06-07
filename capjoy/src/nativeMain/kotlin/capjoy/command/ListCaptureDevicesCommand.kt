@@ -24,14 +24,16 @@ class ListCaptureDevicesCommand : CliktCommand(
         val defaultDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio)
         println("Default device is: ${defaultDevice?.localizedName}")
 
-        val devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeAudio)
+        val devices = AVCaptureDevice.devices()
         val got = devices.map {
             it as AVCaptureDevice
         }.map {
             CaptureDevice(
-                formats = it.formats.map { it as AVCaptureDeviceFormat }.map { captureDeviceFormat ->
-                    CaptureDeviceFormat(captureDeviceFormat.description, captureDeviceFormat.mediaType)
-                },
+                formats = it.formats
+                    .map { format -> format as AVCaptureDeviceFormat }
+                    .map { captureDeviceFormat ->
+                        CaptureDeviceFormat(captureDeviceFormat.description, captureDeviceFormat.mediaType)
+                    },
                 localizedName = it.localizedName,
                 manufacturer = it.manufacturer,
                 uniqueID = it.uniqueID,
