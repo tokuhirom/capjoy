@@ -22,7 +22,6 @@ fun main(args: Array<String>) {
         RecordAudioCommand(),
         MixCommand(),
         RecordMixCommand(),
-
         VersionCommand(),
     ).main(args)
 }
