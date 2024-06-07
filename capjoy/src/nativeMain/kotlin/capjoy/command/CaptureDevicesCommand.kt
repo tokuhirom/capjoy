@@ -1,8 +1,8 @@
 package capjoy.command
 
-import capjoy.model.CaptureDevice
-import capjoy.model.CaptureDeviceFormat
-import capjoy.model.CaptureDevices
+import capjoy.model.command.ListCaptureDevicesOutput
+import capjoy.model.entity.CaptureDevice
+import capjoy.model.entity.CaptureDeviceFormat
 import com.github.ajalt.clikt.core.CliktCommand
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.serialization.encodeToString
@@ -38,6 +38,6 @@ class CaptureDevicesCommand : CliktCommand() {
                 modelID = it.modelID,
             )
         }
-        println(json.encodeToString(CaptureDevices(got)))
+        println(json.encodeToString(ListCaptureDevicesOutput(got)))
     }
 }

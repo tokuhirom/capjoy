@@ -1,7 +1,7 @@
 package capjoy
 
-import capjoy.model.Application
-import capjoy.model.Rect
+import capjoy.model.entity.Application
+import capjoy.model.entity.Rect
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreGraphics.CGRect

@@ -1,7 +1,7 @@
 package capjoy.command
 
 import capjoy.handleContent
-import capjoy.model.Applications
+import capjoy.model.command.ListApplicationsOutput
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
 import kotlinx.cinterop.BetaInteropApi
@@ -24,7 +24,7 @@ class ApplicationsCommand : CliktCommand() {
                 }.map {
                     it.toModel()
                 }
-            println(json.encodeToString(Applications(got)))
+            println(json.encodeToString(ListApplicationsOutput(got)))
         }
     }
 }

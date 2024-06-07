@@ -1,8 +1,8 @@
 package capjoy.command
 
 import capjoy.handleContent
-import capjoy.model.Display
-import capjoy.model.Displays
+import capjoy.model.command.ListDisplayOutput
+import capjoy.model.entity.Display
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
 import kotlinx.cinterop.BetaInteropApi
@@ -33,7 +33,7 @@ class DisplaysCommand : CliktCommand() {
                         description = it.description,
                     )
                 }
-            println(json.encodeToString(Displays(got)))
+            println(json.encodeToString(ListDisplayOutput(got)))
         }
     }
 }

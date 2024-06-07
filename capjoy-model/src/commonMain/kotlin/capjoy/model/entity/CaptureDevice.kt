@@ -1,4 +1,4 @@
-package capjoy.model
+package capjoy.model.entity
 
 import kotlinx.serialization.Serializable
 

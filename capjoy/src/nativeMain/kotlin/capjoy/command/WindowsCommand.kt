@@ -1,8 +1,8 @@
 package capjoy.command
 
 import capjoy.handleContent
-import capjoy.model.Window
-import capjoy.model.Windows
+import capjoy.model.command.ListWindowsOutput
+import capjoy.model.entity.Window
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
 import kotlinx.cinterop.BetaInteropApi
@@ -35,7 +35,7 @@ class WindowsCommand : CliktCommand() {
                         windowLayer = it.windowLayer,
                     )
                 }
-            println(json.encodeToString(Windows(got)))
+            println(json.encodeToString(ListWindowsOutput(got)))
         }
     }
 }
