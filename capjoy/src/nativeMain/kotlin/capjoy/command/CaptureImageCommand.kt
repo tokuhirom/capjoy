@@ -26,7 +26,7 @@ import platform.ImageIO.CGImageDestinationAddImage
 import platform.ImageIO.CGImageDestinationCreateWithURL
 import platform.ImageIO.CGImageDestinationFinalize
 
-class ImageCommand : CliktCommand() {
+class CaptureImageCommand : CliktCommand() {
     private val windowID: Long by argument().long()
     private val path: String by argument()
     private val format by option().choice("png", "jpg")

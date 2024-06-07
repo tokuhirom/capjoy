@@ -11,7 +11,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import platform.ScreenCaptureKit.SCDisplay
 
-class DisplaysCommand : CliktCommand() {
+class ListDisplaysCommand : CliktCommand(
+    "List all displays",
+) {
     private val json =
         Json {
             prettyPrint = true

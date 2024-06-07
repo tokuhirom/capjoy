@@ -9,7 +9,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import platform.ScreenCaptureKit.SCRunningApplication
 
-class ApplicationsCommand : CliktCommand() {
+class ListApplicationsCommand : CliktCommand(
+    "List all running applications",
+) {
     private val json =
         Json {
             prettyPrint = true

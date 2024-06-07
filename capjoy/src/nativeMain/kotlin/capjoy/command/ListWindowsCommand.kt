@@ -11,7 +11,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import platform.ScreenCaptureKit.SCWindow
 
-class WindowsCommand : CliktCommand() {
+class ListWindowsCommand : CliktCommand(
+    "List all windows",
+) {
     private val json =
         Json {
             prettyPrint = true

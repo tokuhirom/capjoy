@@ -11,7 +11,9 @@ import platform.AVFoundation.AVCaptureDevice
 import platform.AVFoundation.AVCaptureDeviceFormat
 import platform.AVFoundation.AVMediaTypeAudio
 
-class CaptureDevicesCommand : CliktCommand() {
+class ListCaptureDevicesCommand : CliktCommand(
+    "List all capture devices",
+) {
     private val json =
         Json {
             prettyPrint = true
