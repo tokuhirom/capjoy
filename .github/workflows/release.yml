@@ -6,7 +6,13 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+          - { runner: macos-latest, target: macosX64, binary-name: capjoy_macos_x64 }
+          - { runner: macos-latest, target: macosArm64, binary-name: capjoy_macos_arm64 }
+    runs-on: ${{ matrix.job.runner }}
 
     steps:
       - name: Checkout code
@@ -26,16 +32,47 @@ jobs:
           perl -pi -e 's/__VERSION__/${{ github.event.release.tag_name }}/g' capjoy/src/nativeMain/kotlin/capjoy/command/VersionCommand.kt
 
       - name: Build Kotlin/Native binary
-        run: ./gradlew build
+        run: ./gradlew ${{ matrix.job.target }}Binaries
 
+      - name: Archive binary
+        run: |
+          cd build
+          tar -czvf ${{ matrix.job.binary-name }}.tar.gz ${{ matrix.job.binary-name }}
 
-      - name: Show status of downloaded artifacts
-        run: ls -lR ./capjoy/build/
-
-      - name: Upload Release Asset
-        uses: skx/github-action-publish-binaries@release-1.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v4
         with:
-          releaseId: ${{ needs.create_release.outputs.id }}
-          args: ./capjoy/build/bin/native/releaseExecutable/capjoy.kexe
+          name: ${{ matrix.job.binary-name }}
+          path: build/${{ matrix.job.binary-name }}.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+      - name: Mkdir assets dir
+        run: |
+          mkdir -p assets
+      - name: Extract binary
+        run: |
+          for file in artifacts/**/*.tar.gz; do
+              tar -xzvf $file -C assets/
+              mv $file assets/
+          done
+      - name: ls assets dir
+        run: |
+          ls -la assets/
+      - name: sha256sum
+        run: |
+          cd assets
+          sha256sum capjoy_* > checksums.txt
+          cat checksums.txt
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: assets/*
+          generate_release_notes: true
+          make_latest: true
