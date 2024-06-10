@@ -1,6 +1,7 @@
 package capjoy.command.capture
 
 import capjoy.recorder.startScreenRecord
+import capjoy.waitProcessing
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -8,7 +9,6 @@ import kotlinx.cinterop.memScoped
 import platform.Foundation.NSRunLoop
 import platform.Foundation.run
 import platform.posix.exit
-import platform.posix.sleep
 
 @OptIn(ExperimentalForeignApi::class)
 class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
@@ -17,9 +17,7 @@ class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
     override fun run() {
         memScoped {
             startScreenRecord(fileName) { screenRecorder ->
-                println("Recording... Press ENTER to stop.")
-                sleep(10u)
-                println("Slept...")
+                waitProcessing()
 
                 screenRecorder.stop {
                     println("Writing finished")

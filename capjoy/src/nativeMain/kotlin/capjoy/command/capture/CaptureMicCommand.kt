@@ -1,6 +1,7 @@
 package capjoy.command.capture
 
 import capjoy.recorder.startAudioRecording
+import capjoy.waitProcessing
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
@@ -9,7 +10,6 @@ import com.github.ajalt.clikt.parameters.types.choice
 import platform.AVFoundation.AVFileType
 import platform.AVFoundation.AVFileTypeMPEG4
 import platform.AVFoundation.AVFileTypeWAVE
-import platform.posix.sleep
 
 class CaptureMicCommand : CliktCommand("Capture audio from the default input device") {
     private val fileName: String by argument()
@@ -25,10 +25,7 @@ class CaptureMicCommand : CliktCommand("Capture audio from the default input dev
 
         val recorder = startAudioRecording(outFormat, fileName)
 
-        println("Recording... Press ENTER to stop.")
-        sleep(10u)
-
-        println("Recording stopped.")
+        waitProcessing()
 
         recorder.stop()
     }
