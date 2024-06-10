@@ -15,13 +15,36 @@ This is a simple CLI application, that captures image, video(Not implemented), a
 
 ## Install
 
+There's a binary on github releases. You can download it from
+[here](https://github.com/tokuhirom/capjoy/releases).
+
 (TBD: i want to support the homebrew)
 
 ## Usage
 
 ```shell
-$ capjoy --help
+Usage: capjoy [<options>] <command> [<args>]...
+debugExecutable/    releaseExecutable/
+Options:
+  -h, --help  Show this message and exit
+
+Commands:
+  list-displays         List all displays
+  list-applications     List all running applications
+  list-windows          List all windows
+  list-capture-devices  List all capture devices
+  capture-image
+  record-mic
+  record-audio
+  mix
+  record-mix
+  version               Print the version of Capjoy.
 ```
+
+## Permission
+
+This application requires the permissions to capture screen and/or audio.
+Please allow it.
 
 ## LICENSE
 

@@ -1,4 +1,4 @@
-package capjoy.command
+package capjoy.command.list
 
 import capjoy.handleContent
 import capjoy.model.command.ListDisplayOutput

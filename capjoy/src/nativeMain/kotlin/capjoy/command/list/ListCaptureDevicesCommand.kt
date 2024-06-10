@@ -1,4 +1,4 @@
-package capjoy.command
+package capjoy.command.list
 
 import capjoy.model.command.ListCaptureDevicesOutput
 import capjoy.model.entity.CaptureDevice

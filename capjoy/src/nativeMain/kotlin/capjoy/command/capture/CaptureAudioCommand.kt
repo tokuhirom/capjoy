@@ -1,4 +1,4 @@
-package capjoy.command
+package capjoy.command.capture
 
 import capjoy.recorder.startScreenRecord
 import com.github.ajalt.clikt.core.CliktCommand
@@ -11,7 +11,7 @@ import platform.posix.exit
 import platform.posix.sleep
 
 @OptIn(ExperimentalForeignApi::class)
-class RecordAudioCommand : CliktCommand() {
+class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
     private val fileName: String by argument()
 
     override fun run() {
@@ -19,7 +19,7 @@ class RecordAudioCommand : CliktCommand() {
             startScreenRecord(fileName) { screenRecorder ->
                 println("Recording... Press ENTER to stop.")
                 sleep(10u)
-                println("Sleeped...")
+                println("Slept...")
 
                 screenRecorder.stop {
                     println("Writing finished")

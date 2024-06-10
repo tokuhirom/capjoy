@@ -1,14 +1,14 @@
 import capjoy.command.CapjoyCommand
-import capjoy.command.CaptureImageCommand
-import capjoy.command.ListApplicationsCommand
-import capjoy.command.ListCaptureDevicesCommand
-import capjoy.command.ListDisplaysCommand
-import capjoy.command.ListWindowsCommand
-import capjoy.command.MixCommand
-import capjoy.command.RecordAudioCommand
-import capjoy.command.RecordMicCommand
-import capjoy.command.RecordMixCommand
 import capjoy.command.VersionCommand
+import capjoy.command.capture.CaptureAudioCommand
+import capjoy.command.capture.CaptureImageCommand
+import capjoy.command.capture.CaptureMicCommand
+import capjoy.command.capture.CaptureMixCommand
+import capjoy.command.list.ListApplicationsCommand
+import capjoy.command.list.ListCaptureDevicesCommand
+import capjoy.command.list.ListDisplaysCommand
+import capjoy.command.list.ListWindowsCommand
+import capjoy.command.misc.MixCommand
 import com.github.ajalt.clikt.core.subcommands
 
 fun main(args: Array<String>) {
@@ -18,10 +18,10 @@ fun main(args: Array<String>) {
         ListWindowsCommand(),
         ListCaptureDevicesCommand(),
         CaptureImageCommand(),
-        RecordMicCommand(),
-        RecordAudioCommand(),
+        CaptureMicCommand(),
+        CaptureAudioCommand(),
         MixCommand(),
-        RecordMixCommand(),
+        CaptureMixCommand(),
         VersionCommand(),
     ).main(args)
 }

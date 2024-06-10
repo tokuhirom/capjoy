@@ -1,4 +1,4 @@
-package capjoy.command
+package capjoy.command.capture
 
 import capjoy.recorder.startAudioRecording
 import com.github.ajalt.clikt.core.CliktCommand
@@ -11,7 +11,7 @@ import platform.AVFoundation.AVFileTypeMPEG4
 import platform.AVFoundation.AVFileTypeWAVE
 import platform.posix.sleep
 
-class RecordMicCommand : CliktCommand() {
+class CaptureMicCommand : CliktCommand("Capture audio from the default input device") {
     private val fileName: String by argument()
     private val format by option().choice("m4a", "wav").default("m4a")
 

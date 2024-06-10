@@ -1,5 +1,6 @@
-package capjoy.command
+package capjoy.command.capture
 
+import capjoy.createTempFile
 import capjoy.recorder.mix
 import capjoy.recorder.startAudioRecording
 import capjoy.recorder.startScreenRecord
@@ -7,23 +8,11 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import platform.AVFoundation.AVFileTypeMPEG4
 import platform.Foundation.NSRunLoop
-import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.run
 import platform.posix.sleep
 import platform.posix.unlink
-import kotlin.random.Random
 
-private fun createTempFile(
-    prefix: String,
-    suffix: String,
-): String {
-    val tempDir = NSTemporaryDirectory()
-    val fileName = "$prefix${Random.nextInt()}$suffix"
-    val filePath = tempDir + fileName
-    return filePath
-}
-
-class RecordMixCommand : CliktCommand() {
+class CaptureMixCommand : CliktCommand("Capture and mix mic audio and screen audio into a single file") {
     private val outFileName: String by argument()
 
     override fun run() {

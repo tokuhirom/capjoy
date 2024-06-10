@@ -1,4 +1,4 @@
-package capjoy.command
+package capjoy.command.capture
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
@@ -26,7 +26,9 @@ import platform.ImageIO.CGImageDestinationAddImage
 import platform.ImageIO.CGImageDestinationCreateWithURL
 import platform.ImageIO.CGImageDestinationFinalize
 
-class CaptureImageCommand : CliktCommand() {
+class CaptureImageCommand : CliktCommand(
+    "Capture an image of a window",
+) {
     private val windowID: Long by argument().long()
     private val path: String by argument()
     private val format by option().choice("png", "jpg")
