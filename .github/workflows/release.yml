@@ -30,7 +30,7 @@ jobs:
 
 
       - name: Show status of downloaded artifacts
-        run: ls -lR ./build
+        run: ls -lR ./capjoy/build/
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
