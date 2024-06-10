@@ -28,25 +28,6 @@ jobs:
       - name: Build Kotlin/Native binary
         run: ./gradlew build
 
-      - name: Archive the build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: binary
-          path: capjoy/build/bin/native/releaseExecutable/*
-
-  release:
-    needs: build
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: binary
-          path: ./build
 
       - name: Show status of downloaded artifacts
         run: ls -lR ./build
@@ -54,6 +35,7 @@ jobs:
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: ./build/capjoy.kexe
+          files: |
+            ./capjoy/build/bin/native/releaseExecutable/capjoy.kexe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
