@@ -33,11 +33,12 @@ Commands:
   list-applications     List all running applications
   list-windows          List all windows
   list-capture-devices  List all capture devices
-  capture-image
-  record-mic
-  record-audio
-  mix
-  record-mix
+  capture-image         Capture an image of a window
+  capture-mic           Capture audio from the default input device
+  capture-audio         Capture audio from the screen
+  mix                   Mix audio files
+  capture-mix           Capture and mix mic audio and screen audio into a
+                        single file
   version               Print the version of Capjoy.
 ```
 
