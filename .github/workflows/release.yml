@@ -10,8 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          - { runner: macos-latest, target: macosX64, binary-name: capjoy_macos_x64 }
-          - { runner: macos-latest, target: macosArm64, binary-name: capjoy_macos_arm64 }
+          - { runner: macos-latest, target: native, binary-name: capjoy_macos_arm64 }
     runs-on: ${{ matrix.job.runner }}
 
     steps:
