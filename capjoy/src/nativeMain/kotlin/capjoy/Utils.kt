@@ -8,8 +8,6 @@ import platform.Foundation.NSTemporaryDirectory
 import platform.ScreenCaptureKit.SCShareableContent
 import platform.posix.exit
 import platform.posix.fprintf
-import platform.posix.getenv
-import platform.posix.sleep
 import platform.posix.stderr
 import kotlin.random.Random
 
@@ -23,18 +21,10 @@ fun createTempFile(
     return filePath
 }
 
-@OptIn(ExperimentalForeignApi::class)
 fun waitProcessing() {
-    if (getenv("CAPJOY_GRADLE_RUN_DEBUG") != null) {
-        // on gradle, stdin is not usable. sleep for a while
-        println("CAPJOY_GRADLE_RUN_DEBUG is set... sleeping 10 seconds...")
-        sleep(10u)
-        println("Finished sleeping...")
-    } else {
-        println("waiting for user input...")
-        readlnOrNull()
-        println("User input received.")
-    }
+    println("Please press Enter to stop capturing process.")
+    readlnOrNull()
+    println("User input received.")
 }
 
 @OptIn(ExperimentalForeignApi::class)
