@@ -33,9 +33,9 @@ jobs:
         run: ls -lR ./capjoy/build/
 
       - name: Upload Release Asset
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            ./capjoy/build/bin/native/releaseExecutable/capjoy.kexe
+        uses: skx/github-action-publish-binaries@release-1.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseId: ${{ needs.create_release.outputs.id }}
+          args: ./capjoy/build/bin/native/releaseExecutable/capjoy.kexe
