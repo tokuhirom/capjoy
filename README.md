@@ -24,21 +24,21 @@ There's a binary on github releases. You can download it from
 
 ```shell
 Usage: capjoy [<options>] <command> [<args>]...
-debugExecutable/    releaseExecutable/
+
 Options:
   -h, --help  Show this message and exit
 
 Commands:
-  list-displays         List all displays
   list-applications     List all running applications
-  list-windows          List all windows
   list-capture-devices  List all capture devices
+  list-displays         List all displays
+  list-windows          List all windows
+  capture-audio         Capture audio from the screen
   capture-image         Capture an image of a window
   capture-mic           Capture audio from the default input device
-  capture-audio         Capture audio from the screen
-  mix                   Mix audio files
   capture-mix           Capture and mix mic audio and screen audio into a
                         single file
+  mix                   Mix audio files
   version               Print the version of Capjoy.
 ```
 
