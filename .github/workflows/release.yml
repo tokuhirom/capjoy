@@ -48,15 +48,12 @@ jobs:
           name: binary
           path: ./build
 
-      - name: show status of downloaded artifacts
+      - name: Show status of downloaded artifacts
         run: ls -lR ./build
 
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./build/capjoy.kexe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./build/capjoy.kexe
-          asset_name: capjoy.kexe
-          asset_content_type: application/octet-stream
