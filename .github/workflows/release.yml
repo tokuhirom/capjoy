@@ -48,6 +48,9 @@ jobs:
           name: binary
           path: ./build
 
+      - name: show status of downloaded artifacts
+        run: ls -lR ./build
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
