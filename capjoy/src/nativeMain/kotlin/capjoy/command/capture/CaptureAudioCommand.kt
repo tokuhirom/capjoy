@@ -25,7 +25,7 @@ class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
                     display,
                     excludingWindows = emptyList<Any>(),
                 )
-                startScreenRecord(fileName, contentFilter) { screenRecorder ->
+                startScreenRecord(fileName, contentFilter, isVideo = false) { screenRecorder ->
                     waitProcessing()
 
                     screenRecorder.stop {

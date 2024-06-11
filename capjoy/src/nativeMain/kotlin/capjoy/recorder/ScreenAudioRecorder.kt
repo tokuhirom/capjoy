@@ -9,7 +9,17 @@ import platform.AVFAudio.AVSampleRateKey
 import platform.AVFoundation.AVAssetWriter
 import platform.AVFoundation.AVAssetWriterInput
 import platform.AVFoundation.AVFileTypeAppleM4A
+import platform.AVFoundation.AVFileTypeQuickTimeMovie
 import platform.AVFoundation.AVMediaTypeAudio
+import platform.AVFoundation.AVMediaTypeVideo
+import platform.AVFoundation.AVVideoAverageBitRateKey
+import platform.AVFoundation.AVVideoCodecKey
+import platform.AVFoundation.AVVideoCodecTypeH264
+import platform.AVFoundation.AVVideoCompressionPropertiesKey
+import platform.AVFoundation.AVVideoHeightKey
+import platform.AVFoundation.AVVideoProfileLevelH264HighAutoLevel
+import platform.AVFoundation.AVVideoProfileLevelKey
+import platform.AVFoundation.AVVideoWidthKey
 import platform.CoreAudioTypes.kAudioFormatMPEG4AAC
 import platform.CoreMedia.CMSampleBufferIsValid
 import platform.CoreMedia.CMSampleBufferRef
@@ -24,6 +34,7 @@ import platform.ScreenCaptureKit.SCStreamOutputProtocol
 import platform.ScreenCaptureKit.SCStreamOutputType
 import platform.darwin.NSObject
 import platform.posix.exit
+import kotlin.error
 
 fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
     SCShareableContent.getShareableContentWithCompletionHandler { content, error ->
@@ -43,20 +54,13 @@ fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-fun createAssetWriter(fileName: String, audioWriterInput: AVAssetWriterInput): AVAssetWriter {
+fun createAssetWriter(fileName: String, isVideo: Boolean): AVAssetWriter {
     val outputFileURL = NSURL.fileURLWithPath(fileName)
     println("Output file: ${outputFileURL.path}")
 
-    val assetWriter =
-        AVAssetWriter(outputFileURL, fileType = AVFileTypeAppleM4A, error = null)
-    assetWriter.addInput(audioWriterInput)
+    val fileType = if (isVideo) AVFileTypeQuickTimeMovie else AVFileTypeAppleM4A
+    val assetWriter = AVAssetWriter(outputFileURL, fileType = fileType, error = null)
 
-    if (!assetWriter.startWriting()) {
-        println("Failed to start writing: ${assetWriter.error?.localizedDescription}")
-        exit(1)
-    }
-
-    assetWriter.startSessionAtSourceTime(CMTimeMake(value = 0, timescale = 1))
     return assetWriter
 }
 
@@ -76,20 +80,59 @@ fun createAudioWriterInput(): AVAssetWriterInput {
 }
 
 @OptIn(ExperimentalForeignApi::class)
+fun createVideoWriterInput(): AVAssetWriterInput {
+    val videoSettings = mapOf<Any?, Any?>(
+        AVVideoCodecKey to AVVideoCodecTypeH264,
+        AVVideoWidthKey to 1920,
+        AVVideoHeightKey to 1080,
+        AVVideoCompressionPropertiesKey to mapOf(
+            AVVideoAverageBitRateKey to 6000000,
+            AVVideoProfileLevelKey to AVVideoProfileLevelH264HighAutoLevel,
+        )
+    )
+    return AVAssetWriterInput(
+        mediaType = AVMediaTypeVideo,
+        outputSettings = videoSettings,
+        sourceFormatHint = null,
+    )
+}
+
+@OptIn(ExperimentalForeignApi::class)
 fun startScreenRecord(
     fileName: String,
     contentFilter: SCContentFilter,
-    callback: (ScreenRecorder) -> Unit,
+    isVideo: Boolean,
+    callback: (ScreenRecorder) -> Unit
 ) {
     val captureConfiguration = SCStreamConfiguration().apply {
-        showsCursor = false
+        showsCursor = isVideo
         capturesAudio = true
+        if (isVideo) {
+            width = 1920u
+            height = 1080u
+            minimumFrameInterval = CMTimeMake(value = 1, timescale = 30) // 30 FPS
+        }
     }
 
     val stream = SCStream(contentFilter, captureConfiguration, null)
 
+    val assetWriter = createAssetWriter(fileName, isVideo)
+
     val audioWriterInput = createAudioWriterInput()
-    val assetWriter = createAssetWriter(fileName, audioWriterInput)
+    assetWriter.addInput(audioWriterInput)
+
+    val videoWriterInput = if (isVideo) {
+        val videoInput = createVideoWriterInput()
+        assetWriter.addInput(videoInput)
+        videoInput
+    } else null
+
+    if (!assetWriter.startWriting()) {
+        println("Failed to start writing: ${assetWriter.error?.localizedDescription}")
+        exit(1)
+    }
+
+    assetWriter.startSessionAtSourceTime(CMTimeMake(value = 0, timescale = 1))
 
     val streamOutput = object : NSObject(), SCStreamOutputProtocol {
         override fun stream(
@@ -109,7 +152,11 @@ fun startScreenRecord(
                     }
                 }
 
-                SCStreamOutputType.SCStreamOutputTypeScreen -> TODO()
+                SCStreamOutputType.SCStreamOutputTypeScreen -> {
+                    if (videoWriterInput?.readyForMoreMediaData == true) {
+                        videoWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)
+                    }
+                }
             }
         }
     }
@@ -120,19 +167,28 @@ fun startScreenRecord(
         sampleHandlerQueue = null,
         error = null,
     )
+    if (isVideo) {
+        stream.addStreamOutput(
+            streamOutput,
+            SCStreamOutputType.SCStreamOutputTypeScreen,
+            sampleHandlerQueue = null,
+            error = null,
+        )
+    }
 
     stream.startCaptureWithCompletionHandler { error ->
         if (error != null) {
             error("Failed to start capture: ${error.localizedDescription}")
         }
 
-        callback(ScreenRecorder(stream, audioWriterInput, assetWriter))
+        callback(ScreenRecorder(stream, audioWriterInput, videoWriterInput, assetWriter))
     }
 }
 
 data class ScreenRecorder(
     val stream: SCStream,
     val audioWriterInput: AVAssetWriterInput,
+    val videoWriterInput: AVAssetWriterInput?,
     val assetWriter: AVAssetWriter,
 ) {
     fun stop(callback: () -> Unit) {
@@ -142,6 +198,7 @@ data class ScreenRecorder(
             } else {
                 println("Capture stopped")
                 audioWriterInput.markAsFinished()
+                videoWriterInput?.markAsFinished()
                 assetWriter.finishWritingWithCompletionHandler {
                     callback()
                 }

@@ -32,7 +32,7 @@ class CaptureMixCommand : CliktCommand("Capture and mix mic audio and screen aud
                 display,
                 excludingWindows = emptyList<Any>(),
             )
-            startScreenRecord(screenFile, contentFilter) { screenRecorder ->
+            startScreenRecord(screenFile, contentFilter, isVideo = false) { screenRecorder ->
                 waitProcessing()
 
                 micRecorder.stop()
