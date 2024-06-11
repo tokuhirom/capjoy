@@ -10,6 +10,7 @@ import kotlinx.cinterop.memScoped
 import platform.Foundation.NSRunLoop
 import platform.Foundation.run
 import platform.ScreenCaptureKit.SCContentFilter
+import platform.ScreenCaptureKit.SCStreamConfiguration
 import platform.posix.exit
 
 @OptIn(ExperimentalForeignApi::class)
@@ -25,11 +26,20 @@ class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
                     display,
                     excludingWindows = emptyList<Any>(),
                 )
-                startScreenRecord(fileName, contentFilter) { screenRecorder ->
+                val captureConfiguration = SCStreamConfiguration().apply {
+                    capturesAudio = true
+                }
+                startScreenRecord(
+                    fileName,
+                    contentFilter,
+                    enableVideo = false,
+                    enableAudio = true,
+                    captureConfiguration,
+                ) { screenRecorder ->
                     waitProcessing()
 
                     screenRecorder.stop {
-                        println("Writing finished")
+                        println("Writing finished: $fileName")
                         exit(0)
                     }
                 }

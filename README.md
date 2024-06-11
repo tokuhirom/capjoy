@@ -22,7 +22,7 @@ There's a binary on github releases. You can download it from
 
 ## Usage
 
-```shell
+```
 Usage: capjoy [<options>] <command> [<args>]...
 
 Options:
@@ -38,6 +38,7 @@ Commands:
   capture-mic           Capture audio from the default input device
   capture-mix           Capture and mix mic audio and screen audio into a
                         single file
+  capture-video         Capture video and audio from the screen
   mix                   Mix audio files
   version               Print the version of Capjoy.
 ```

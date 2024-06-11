@@ -12,6 +12,7 @@ import platform.AVFoundation.AVFileTypeMPEG4
 import platform.Foundation.NSRunLoop
 import platform.Foundation.run
 import platform.ScreenCaptureKit.SCContentFilter
+import platform.ScreenCaptureKit.SCStreamConfiguration
 import platform.posix.unlink
 
 class CaptureMixCommand : CliktCommand("Capture and mix mic audio and screen audio into a single file") {
@@ -32,7 +33,16 @@ class CaptureMixCommand : CliktCommand("Capture and mix mic audio and screen aud
                 display,
                 excludingWindows = emptyList<Any>(),
             )
-            startScreenRecord(screenFile, contentFilter) { screenRecorder ->
+            val captureConfiguration = SCStreamConfiguration().apply {
+                capturesAudio = true
+            }
+            startScreenRecord(
+                screenFile,
+                contentFilter,
+                enableVideo = false,
+                enableAudio = true,
+                captureConfiguration,
+            ) { screenRecorder ->
                 waitProcessing()
 
                 micRecorder.stop()
