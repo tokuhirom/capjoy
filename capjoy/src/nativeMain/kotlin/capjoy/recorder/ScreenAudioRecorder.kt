@@ -21,9 +21,10 @@ import platform.AVFoundation.AVVideoProfileLevelH264HighAutoLevel
 import platform.AVFoundation.AVVideoProfileLevelKey
 import platform.AVFoundation.AVVideoWidthKey
 import platform.CoreAudioTypes.kAudioFormatMPEG4AAC
+import platform.CoreMedia.CMClockGetHostTimeClock
+import platform.CoreMedia.CMClockGetTime
 import platform.CoreMedia.CMSampleBufferIsValid
 import platform.CoreMedia.CMSampleBufferRef
-import platform.CoreMedia.CMTimeMake
 import platform.Foundation.NSURL
 import platform.ScreenCaptureKit.SCContentFilter
 import platform.ScreenCaptureKit.SCDisplay
@@ -143,7 +144,10 @@ fun startScreenRecord(
         exit(1)
     }
 
-    assetWriter.startSessionAtSourceTime(CMTimeMake(value = 0, timescale = 1))
+    // CMClock.hostTimeClock.time
+    val hostTimeClock = CMClockGetHostTimeClock()
+    val now = CMClockGetTime(hostTimeClock)
+    assetWriter.startSessionAtSourceTime(now)
 
     val streamOutput = object : NSObject(), SCStreamOutputProtocol {
         override fun stream(
@@ -212,12 +216,18 @@ data class ScreenRecorder(
     val videoWriterInput: AVAssetWriterInput?,
     val assetWriter: AVAssetWriter,
 ) {
+    @OptIn(ExperimentalForeignApi::class)
     fun stop(callback: () -> Unit) {
         stream.stopCaptureWithCompletionHandler { error ->
             if (error != null) {
                 println("Failed to stop capture: ${error.localizedDescription}")
             } else {
                 println("Capture stopped")
+
+                val hostTimeClock = CMClockGetHostTimeClock()
+                val now = CMClockGetTime(hostTimeClock)
+                assetWriter.endSessionAtSourceTime(now)
+
                 audioWriterInput.markAsFinished()
                 videoWriterInput?.markAsFinished()
                 assetWriter.finishWritingWithCompletionHandler {
