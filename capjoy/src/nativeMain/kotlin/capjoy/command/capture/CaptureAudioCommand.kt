@@ -33,7 +33,7 @@ class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
                     fileName,
                     contentFilter,
                     isVideo = false,
-                    captureConfiguration
+                    captureConfiguration,
                 ) { screenRecorder ->
                     waitProcessing()
 

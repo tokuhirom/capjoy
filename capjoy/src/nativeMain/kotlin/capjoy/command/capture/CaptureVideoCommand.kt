@@ -53,7 +53,7 @@ class CaptureVideoCommand : CliktCommand("Capture video and audio from the scree
                         fileName,
                         contentFilter,
                         isVideo = true,
-                        captureConfiguration
+                        captureConfiguration,
                     ) { screenRecorder ->
                         waitProcessing()
 

@@ -54,7 +54,10 @@ fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
     }
 }
 
-fun findWindowByWindowId(windowId: Long, windowCallback: (SCWindow) -> Unit) {
+fun findWindowByWindowId(
+    windowId: Long,
+    windowCallback: (SCWindow) -> Unit,
+) {
     SCShareableContent.getShareableContentWithCompletionHandler { content, error ->
         if (error != null) {
             println("Error getting shareable content: ${error.localizedDescription}")
@@ -74,7 +77,10 @@ fun findWindowByWindowId(windowId: Long, windowCallback: (SCWindow) -> Unit) {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-fun createAssetWriter(fileName: String, isVideo: Boolean): AVAssetWriter {
+fun createAssetWriter(
+    fileName: String,
+    isVideo: Boolean,
+): AVAssetWriter {
     val outputFileURL = NSURL.fileURLWithPath(fileName)
     println("Output file: ${outputFileURL.path}")
 
@@ -108,7 +114,7 @@ fun createVideoWriterInput(): AVAssetWriterInput {
         AVVideoCompressionPropertiesKey to mapOf(
             AVVideoAverageBitRateKey to 6000000,
             AVVideoProfileLevelKey to AVVideoProfileLevelH264HighAutoLevel,
-        )
+        ),
     )
     return AVAssetWriterInput(
         mediaType = AVMediaTypeVideo,
@@ -123,7 +129,7 @@ fun startScreenRecord(
     contentFilter: SCContentFilter,
     isVideo: Boolean,
     scStreamConfiguration: SCStreamConfiguration,
-    callback: (ScreenRecorder) -> Unit
+    callback: (ScreenRecorder) -> Unit,
 ) {
     val stream = SCStream(contentFilter, scStreamConfiguration, null)
 
@@ -137,7 +143,9 @@ fun startScreenRecord(
         println("Adding video input")
         assetWriter.addInput(videoInput)
         videoInput
-    } else null
+    } else {
+        null
+    }
 
     if (!assetWriter.startWriting()) {
         println("Failed to start writing: ${assetWriter.error?.localizedDescription}")
