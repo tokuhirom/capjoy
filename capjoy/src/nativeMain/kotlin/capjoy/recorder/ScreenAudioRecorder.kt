@@ -35,7 +35,6 @@ import platform.ScreenCaptureKit.SCStreamOutputType
 import platform.ScreenCaptureKit.SCWindow
 import platform.darwin.NSObject
 import platform.posix.exit
-import kotlin.error
 
 fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
     SCShareableContent.getShareableContentWithCompletionHandler { content, error ->
@@ -163,6 +162,8 @@ fun startScreenRecord(
                         if (!audioWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)) {
                             println("Cannot write audio")
                         }
+                    } else {
+                        println("Audio writer input not ready for more media data")
                     }
                 }
 
@@ -171,6 +172,8 @@ fun startScreenRecord(
                         if (!videoWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)) {
                             println("Cannot write video")
                         }
+                    } else {
+                        println("Video writer input not ready for more media data")
                     }
                 }
             }
@@ -194,10 +197,12 @@ fun startScreenRecord(
 
     stream.startCaptureWithCompletionHandler { error ->
         if (error != null) {
-            error("Failed to start capture: ${error.localizedDescription}")
+            println("Failed to start capture: ${error.localizedDescription}")
+            exit(1)
+        } else {
+            println("Capture started successfully")
+            callback(ScreenRecorder(stream, audioWriterInput, videoWriterInput, assetWriter))
         }
-
-        callback(ScreenRecorder(stream, audioWriterInput, videoWriterInput, assetWriter))
     }
 }
 
