@@ -1,6 +1,7 @@
 package capjoy.command.capture
 
 import capjoy.createTempFile
+import capjoy.recorder.findDefaultDisplay
 import capjoy.recorder.mix
 import capjoy.recorder.startAudioRecording
 import capjoy.recorder.startScreenRecord
@@ -10,6 +11,7 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import platform.AVFoundation.AVFileTypeMPEG4
 import platform.Foundation.NSRunLoop
 import platform.Foundation.run
+import platform.ScreenCaptureKit.SCContentFilter
 import platform.posix.unlink
 
 class CaptureMixCommand : CliktCommand("Capture and mix mic audio and screen audio into a single file") {
@@ -23,22 +25,30 @@ class CaptureMixCommand : CliktCommand("Capture and mix mic audio and screen aud
 
         val micRecorder = startAudioRecording(AVFileTypeMPEG4, micFile)
         println("Started micRecorder...")
-        startScreenRecord(screenFile) { screenRecorder ->
-            waitProcessing()
+        findDefaultDisplay { display ->
+            println("Display found: $display")
 
-            micRecorder.stop()
+            val contentFilter = SCContentFilter(
+                display,
+                excludingWindows = emptyList<Any>()
+            )
+            startScreenRecord(screenFile, contentFilter) { screenRecorder ->
+                waitProcessing()
 
-            screenRecorder.stop {
-                println("Writing finished")
+                micRecorder.stop()
 
-                println("Starting mix...")
+                screenRecorder.stop {
+                    println("Writing finished")
 
-                mix(listOf(micFile, screenFile), outFileName)
+                    println("Starting mix...")
 
-                println("Created mix file: $outFileName")
+                    mix(listOf(micFile, screenFile), outFileName)
 
-                unlink(micFile)
-                unlink(screenFile)
+                    println("Created mix file: $outFileName")
+
+                    unlink(micFile)
+                    unlink(screenFile)
+                }
             }
         }
         NSRunLoop.mainRunLoop().run()
