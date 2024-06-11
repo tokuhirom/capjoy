@@ -43,6 +43,39 @@ fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
 }
 
 @OptIn(ExperimentalForeignApi::class)
+fun createAssetWriter(fileName: String, audioWriterInput: AVAssetWriterInput): AVAssetWriter {
+    val outputFileURL = NSURL.fileURLWithPath(fileName)
+    println("Output file: ${outputFileURL.path}")
+
+    val assetWriter =
+        AVAssetWriter(outputFileURL, fileType = AVFileTypeAppleM4A, error = null)
+    assetWriter.addInput(audioWriterInput)
+
+    if (!assetWriter.startWriting()) {
+        println("Failed to start writing: ${assetWriter.error?.localizedDescription}")
+        exit(1)
+    }
+
+    assetWriter.startSessionAtSourceTime(CMTimeMake(value = 0, timescale = 1))
+    return assetWriter
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun createAudioWriterInput(): AVAssetWriterInput {
+    val audioSettings = mapOf<Any?, Any?>(
+        AVFormatIDKey to kAudioFormatMPEG4AAC,
+        AVNumberOfChannelsKey to 1,
+        AVSampleRateKey to 44100.0,
+        AVEncoderBitRateKey to 64000,
+    )
+    return AVAssetWriterInput(
+        mediaType = AVMediaTypeAudio,
+        outputSettings = audioSettings,
+        sourceFormatHint = null,
+    )
+}
+
+@OptIn(ExperimentalForeignApi::class)
 fun startScreenRecord(
     fileName: String,
     contentFilter: SCContentFilter,
@@ -55,32 +88,8 @@ fun startScreenRecord(
 
     val stream = SCStream(contentFilter, captureConfiguration, null)
 
-    // 出力ファイルパスを確認
-    val outputFileURL = NSURL.fileURLWithPath(fileName)
-    println("Output file: ${outputFileURL.path}")
-
-    // AssetWriterの設定
-    val assetWriter =
-        AVAssetWriter(outputFileURL, fileType = AVFileTypeAppleM4A, error = null)
-    val audioSettings = mapOf<Any?, Any?>(
-        AVFormatIDKey to kAudioFormatMPEG4AAC,
-        AVNumberOfChannelsKey to 1,
-        AVSampleRateKey to 44100.0,
-        AVEncoderBitRateKey to 64000,
-    )
-    val assetWriterInput = AVAssetWriterInput(
-        mediaType = AVMediaTypeAudio,
-        outputSettings = audioSettings,
-        sourceFormatHint = null,
-    )
-    assetWriter.addInput(assetWriterInput)
-
-    if (!assetWriter.startWriting()) {
-        println("Failed to start writing: ${assetWriter.error?.localizedDescription}")
-        exit(1)
-    }
-
-    assetWriter.startSessionAtSourceTime(CMTimeMake(value = 0, timescale = 1))
+    val audioWriterInput = createAudioWriterInput()
+    val assetWriter = createAssetWriter(fileName, audioWriterInput)
 
     val streamOutput = object : NSObject(), SCStreamOutputProtocol {
         override fun stream(
@@ -93,8 +102,14 @@ fun startScreenRecord(
                 return
             }
 
-            if (assetWriterInput.readyForMoreMediaData) {
-                assetWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)
+            when (ofType) {
+                SCStreamOutputType.SCStreamOutputTypeAudio -> {
+                    if (audioWriterInput.readyForMoreMediaData) {
+                        audioWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)
+                    }
+                }
+
+                SCStreamOutputType.SCStreamOutputTypeScreen -> TODO()
             }
         }
     }
@@ -111,13 +126,13 @@ fun startScreenRecord(
             error("Failed to start capture: ${error.localizedDescription}")
         }
 
-        callback(ScreenRecorder(stream, assetWriterInput, assetWriter))
+        callback(ScreenRecorder(stream, audioWriterInput, assetWriter))
     }
 }
 
 data class ScreenRecorder(
     val stream: SCStream,
-    val assetWriterInput: AVAssetWriterInput,
+    val audioWriterInput: AVAssetWriterInput,
     val assetWriter: AVAssetWriter,
 ) {
     fun stop(callback: () -> Unit) {
@@ -126,7 +141,7 @@ data class ScreenRecorder(
                 println("Failed to stop capture: ${error.localizedDescription}")
             } else {
                 println("Capture stopped")
-                assetWriterInput.markAsFinished()
+                audioWriterInput.markAsFinished()
                 assetWriter.finishWritingWithCompletionHandler {
                     callback()
                 }
