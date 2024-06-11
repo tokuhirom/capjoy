@@ -4,12 +4,12 @@
 
 ## Description
 
-This is a simple CLI application, that captures image, video(Not implemented), audio from your Mac.
+This is a simple CLI application, that captures image, video, audio from your Mac.
 
 ## Use case
 
 - Record the mic audio to a file
-- Record the screen as a video(Not implemented)
+- Record the screen as a video
 - Capture the screen as an image
 - Record the audio from the applications and mic. And mix it.
 
