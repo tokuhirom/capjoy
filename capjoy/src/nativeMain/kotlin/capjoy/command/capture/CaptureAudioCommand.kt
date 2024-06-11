@@ -1,5 +1,6 @@
 package capjoy.command.capture
 
+import capjoy.recorder.findDefaultDisplay
 import capjoy.recorder.startScreenRecord
 import capjoy.waitProcessing
 import com.github.ajalt.clikt.core.CliktCommand
@@ -8,6 +9,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.memScoped
 import platform.Foundation.NSRunLoop
 import platform.Foundation.run
+import platform.ScreenCaptureKit.SCContentFilter
 import platform.posix.exit
 
 @OptIn(ExperimentalForeignApi::class)
@@ -16,12 +18,20 @@ class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
 
     override fun run() {
         memScoped {
-            startScreenRecord(fileName) { screenRecorder ->
-                waitProcessing()
+            findDefaultDisplay { display ->
+                println("Display found: $display")
 
-                screenRecorder.stop {
-                    println("Writing finished")
-                    exit(0)
+                val contentFilter = SCContentFilter(
+                    display,
+                    excludingWindows = emptyList<Any>(),
+                )
+                startScreenRecord(fileName, contentFilter) { screenRecorder ->
+                    waitProcessing()
+
+                    screenRecorder.stop {
+                        println("Writing finished")
+                        exit(0)
+                    }
                 }
             }
         }

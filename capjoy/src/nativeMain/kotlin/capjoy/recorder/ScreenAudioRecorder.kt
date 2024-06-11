@@ -25,16 +25,7 @@ import platform.ScreenCaptureKit.SCStreamOutputType
 import platform.darwin.NSObject
 import platform.posix.exit
 
-@OptIn(ExperimentalForeignApi::class)
-fun startScreenRecord(
-    fileName: String,
-    callback: (ScreenRecorder) -> Unit,
-) {
-    val captureConfiguration = SCStreamConfiguration().apply {
-        showsCursor = false
-        capturesAudio = true
-    }
-
+fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
     SCShareableContent.getShareableContentWithCompletionHandler { content, error ->
         if (error != null) {
             println("Error getting shareable content: ${error.localizedDescription}")
@@ -47,67 +38,80 @@ fun startScreenRecord(
             return@getShareableContentWithCompletionHandler
         }
 
-        val contentFilter = SCContentFilter(display, excludingWindows = emptyList<Any>())
-        val stream = SCStream(contentFilter, captureConfiguration, null)
+        displayCallback(display)
+    }
+}
 
-        // 出力ファイルパスを確認
-        val outputFileURL = NSURL.fileURLWithPath(fileName)
-        println("Output file: ${outputFileURL.path}")
+@OptIn(ExperimentalForeignApi::class)
+fun startScreenRecord(
+    fileName: String,
+    contentFilter: SCContentFilter,
+    callback: (ScreenRecorder) -> Unit,
+) {
+    val captureConfiguration = SCStreamConfiguration().apply {
+        showsCursor = false
+        capturesAudio = true
+    }
 
-        // AssetWriterの設定
-        val assetWriter =
-            AVAssetWriter(outputFileURL, fileType = AVFileTypeAppleM4A, error = null)
-        val audioSettings = mapOf<Any?, Any?>(
-            AVFormatIDKey to kAudioFormatMPEG4AAC,
-            AVNumberOfChannelsKey to 1,
-            AVSampleRateKey to 44100.0,
-            AVEncoderBitRateKey to 64000,
-        )
-        val assetWriterInput = AVAssetWriterInput(
-            mediaType = AVMediaTypeAudio,
-            outputSettings = audioSettings,
-            sourceFormatHint = null,
-        )
-        assetWriter.addInput(assetWriterInput)
+    val stream = SCStream(contentFilter, captureConfiguration, null)
 
-        if (!assetWriter.startWriting()) {
-            println("Failed to start writing: ${assetWriter.error?.localizedDescription}")
-            exit(1)
-        }
+    // 出力ファイルパスを確認
+    val outputFileURL = NSURL.fileURLWithPath(fileName)
+    println("Output file: ${outputFileURL.path}")
 
-        assetWriter.startSessionAtSourceTime(CMTimeMake(value = 0, timescale = 1))
+    // AssetWriterの設定
+    val assetWriter =
+        AVAssetWriter(outputFileURL, fileType = AVFileTypeAppleM4A, error = null)
+    val audioSettings = mapOf<Any?, Any?>(
+        AVFormatIDKey to kAudioFormatMPEG4AAC,
+        AVNumberOfChannelsKey to 1,
+        AVSampleRateKey to 44100.0,
+        AVEncoderBitRateKey to 64000,
+    )
+    val assetWriterInput = AVAssetWriterInput(
+        mediaType = AVMediaTypeAudio,
+        outputSettings = audioSettings,
+        sourceFormatHint = null,
+    )
+    assetWriter.addInput(assetWriterInput)
 
-        val streamOutput = object : NSObject(), SCStreamOutputProtocol {
-            override fun stream(
-                stream: SCStream,
-                didOutputSampleBuffer: CMSampleBufferRef?,
-                ofType: SCStreamOutputType,
-            ) {
-                if (!CMSampleBufferIsValid(didOutputSampleBuffer)) {
-                    eprintln("Invalid sample buffer")
-                    return
-                }
+    if (!assetWriter.startWriting()) {
+        println("Failed to start writing: ${assetWriter.error?.localizedDescription}")
+        exit(1)
+    }
 
-                if (assetWriterInput.readyForMoreMediaData) {
-                    assetWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)
-                }
-            }
-        }
+    assetWriter.startSessionAtSourceTime(CMTimeMake(value = 0, timescale = 1))
 
-        stream.addStreamOutput(
-            streamOutput,
-            SCStreamOutputType.SCStreamOutputTypeAudio,
-            sampleHandlerQueue = null,
-            error = null,
-        )
-
-        stream.startCaptureWithCompletionHandler { error ->
-            if (error != null) {
-                error("Failed to start capture: ${error.localizedDescription}")
+    val streamOutput = object : NSObject(), SCStreamOutputProtocol {
+        override fun stream(
+            stream: SCStream,
+            didOutputSampleBuffer: CMSampleBufferRef?,
+            ofType: SCStreamOutputType,
+        ) {
+            if (!CMSampleBufferIsValid(didOutputSampleBuffer)) {
+                eprintln("Invalid sample buffer")
+                return
             }
 
-            callback(ScreenRecorder(stream, assetWriterInput, assetWriter))
+            if (assetWriterInput.readyForMoreMediaData) {
+                assetWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)
+            }
         }
+    }
+
+    stream.addStreamOutput(
+        streamOutput,
+        SCStreamOutputType.SCStreamOutputTypeAudio,
+        sampleHandlerQueue = null,
+        error = null,
+    )
+
+    stream.startCaptureWithCompletionHandler { error ->
+        if (error != null) {
+            error("Failed to start capture: ${error.localizedDescription}")
+        }
+
+        callback(ScreenRecorder(stream, assetWriterInput, assetWriter))
     }
 }
 
