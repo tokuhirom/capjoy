@@ -38,6 +38,7 @@ Commands:
   capture-mic           Capture audio from the default input device
   capture-mix           Capture and mix mic audio and screen audio into a
                         single file
+  capture-video         Capture video and audio from the screen
   mix                   Mix audio files
   version               Print the version of Capjoy.
 ```
