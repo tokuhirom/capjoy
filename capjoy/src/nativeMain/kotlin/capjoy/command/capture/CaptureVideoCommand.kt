@@ -38,9 +38,7 @@ class CaptureVideoCommand : CliktCommand("Capture video and audio from the scree
                 findWindowByWindowId(windowID) { window ->
                     println("Window found: $window, title=${window.title}, ${window.owningApplication?.bundleIdentifier}")
 
-                    println("WTF??")
                     val contentFilter = SCContentFilter(desktopIndependentWindow = window)
-                    println("contentFilter: $contentFilter")
                     val captureConfiguration = SCStreamConfiguration().apply {
                         println("Configuring SCStreamConfiguration(showsCursor=$showsCursor)...")
                         this.showsCursor = showsCursor
@@ -50,6 +48,7 @@ class CaptureVideoCommand : CliktCommand("Capture video and audio from the scree
                         println("Width: $width, Height: $height")
                         minimumFrameInterval = CMTimeMake(value = 1, timescale = 30) // 30 FPS
                     }
+
                     startScreenRecord(
                         fileName,
                         contentFilter,
