@@ -127,18 +127,26 @@ fun createVideoWriterInput(): AVAssetWriterInput {
 fun startScreenRecord(
     fileName: String,
     contentFilter: SCContentFilter,
-    isVideo: Boolean,
+    enableVideo: Boolean,
+    enableAudio: Boolean,
     scStreamConfiguration: SCStreamConfiguration,
     callback: (ScreenRecorder) -> Unit,
 ) {
     val stream = SCStream(contentFilter, scStreamConfiguration, null)
 
-    val assetWriter = createAssetWriter(fileName, isVideo)
+    val assetWriter = createAssetWriter(fileName, enableVideo)
 
-    val audioWriterInput = createAudioWriterInput()
-    assetWriter.addInput(audioWriterInput)
+    val audioWriterInput = if (enableAudio) {
+        println("Adding audio input")
+        val audioWriterInput = createAudioWriterInput()
+        assetWriter.addInput(audioWriterInput)
+        audioWriterInput
+    } else {
+        println("Not adding audio input")
+        null
+    }
 
-    val videoWriterInput = if (isVideo) {
+    val videoWriterInput = if (enableVideo) {
         val videoInput = createVideoWriterInput()
         println("Adding video input")
         assetWriter.addInput(videoInput)
@@ -170,7 +178,7 @@ fun startScreenRecord(
 
             when (ofType) {
                 SCStreamOutputType.SCStreamOutputTypeAudio -> {
-                    if (audioWriterInput.readyForMoreMediaData) {
+                    if (audioWriterInput?.readyForMoreMediaData == true) {
                         if (!audioWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)) {
                             println("Cannot write audio")
                         }
@@ -192,13 +200,15 @@ fun startScreenRecord(
         }
     }
 
-    stream.addStreamOutput(
-        streamOutput,
-        SCStreamOutputType.SCStreamOutputTypeAudio,
-        sampleHandlerQueue = null,
-        error = null,
-    )
-    if (isVideo) {
+    if (enableAudio) {
+        stream.addStreamOutput(
+            streamOutput,
+            SCStreamOutputType.SCStreamOutputTypeAudio,
+            sampleHandlerQueue = null,
+            error = null,
+        )
+    }
+    if (enableVideo) {
         stream.addStreamOutput(
             streamOutput,
             SCStreamOutputType.SCStreamOutputTypeScreen,
@@ -220,7 +230,7 @@ fun startScreenRecord(
 
 data class ScreenRecorder(
     val stream: SCStream,
-    val audioWriterInput: AVAssetWriterInput,
+    val audioWriterInput: AVAssetWriterInput?,
     val videoWriterInput: AVAssetWriterInput?,
     val assetWriter: AVAssetWriter,
 ) {
@@ -236,7 +246,7 @@ data class ScreenRecorder(
                 val now = CMClockGetTime(hostTimeClock)
                 assetWriter.endSessionAtSourceTime(now)
 
-                audioWriterInput.markAsFinished()
+                audioWriterInput?.markAsFinished()
                 videoWriterInput?.markAsFinished()
                 assetWriter.finishWritingWithCompletionHandler {
                     callback()

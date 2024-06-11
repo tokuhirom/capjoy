@@ -6,6 +6,7 @@ import capjoy.waitProcessing
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.boolean
 import com.github.ajalt.clikt.parameters.types.long
@@ -26,6 +27,7 @@ import platform.posix.exit
 class CaptureVideoCommand : CliktCommand("Capture video and audio from the screen") {
     private val fileName: String by argument()
     private val showsCursor: Boolean by option().boolean().default(false)
+    private val audio: Boolean by option().boolean().help("Enable audio recording").default(true)
     private val windowID: Long by argument().long()
 
     @OptIn(BetaInteropApi::class)
@@ -52,7 +54,8 @@ class CaptureVideoCommand : CliktCommand("Capture video and audio from the scree
                     startScreenRecord(
                         fileName,
                         contentFilter,
-                        isVideo = true,
+                        enableVideo = true,
+                        enableAudio = audio,
                         captureConfiguration,
                     ) { screenRecorder ->
                         waitProcessing()
