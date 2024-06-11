@@ -4,6 +4,7 @@ import capjoy.command.capture.CaptureAudioCommand
 import capjoy.command.capture.CaptureImageCommand
 import capjoy.command.capture.CaptureMicCommand
 import capjoy.command.capture.CaptureMixCommand
+import capjoy.command.capture.CaptureVideoCommand
 import capjoy.command.list.ListApplicationsCommand
 import capjoy.command.list.ListCaptureDevicesCommand
 import capjoy.command.list.ListDisplaysCommand
@@ -21,6 +22,7 @@ fun main(args: Array<String>) {
         CaptureImageCommand(),
         CaptureMicCommand(),
         CaptureMixCommand(),
+        CaptureVideoCommand(),
         MixCommand(),
         VersionCommand(),
     ).main(args)

@@ -32,6 +32,7 @@ import platform.ScreenCaptureKit.SCStream
 import platform.ScreenCaptureKit.SCStreamConfiguration
 import platform.ScreenCaptureKit.SCStreamOutputProtocol
 import platform.ScreenCaptureKit.SCStreamOutputType
+import platform.ScreenCaptureKit.SCWindow
 import platform.darwin.NSObject
 import platform.posix.exit
 import kotlin.error
@@ -50,6 +51,25 @@ fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
         }
 
         displayCallback(display)
+    }
+}
+
+fun findWindowByWindowId(windowId: Long, windowCallback: (SCWindow) -> Unit) {
+    SCShareableContent.getShareableContentWithCompletionHandler { content, error ->
+        if (error != null) {
+            println("Error getting shareable content: ${error.localizedDescription}")
+            return@getShareableContentWithCompletionHandler
+        }
+
+        val window = content?.windows?.firstOrNull { window ->
+            window is SCWindow && window.windowID.toLong() == windowId
+        }
+        if (window != null && window is SCWindow) {
+            windowCallback(window)
+        } else {
+            println("No window found for window id: $windowId")
+            exit(1)
+        }
     }
 }
 
@@ -114,6 +134,7 @@ fun startScreenRecord(
 
     val videoWriterInput = if (isVideo) {
         val videoInput = createVideoWriterInput()
+        println("Adding video input")
         assetWriter.addInput(videoInput)
         videoInput
     } else null
@@ -139,13 +160,17 @@ fun startScreenRecord(
             when (ofType) {
                 SCStreamOutputType.SCStreamOutputTypeAudio -> {
                     if (audioWriterInput.readyForMoreMediaData) {
-                        audioWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)
+                        if (!audioWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)) {
+                            println("Cannot write audio")
+                        }
                     }
                 }
 
                 SCStreamOutputType.SCStreamOutputTypeScreen -> {
                     if (videoWriterInput?.readyForMoreMediaData == true) {
-                        videoWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)
+                        if (!videoWriterInput.appendSampleBuffer(didOutputSampleBuffer!!)) {
+                            println("Cannot write video")
+                        }
                     }
                 }
             }

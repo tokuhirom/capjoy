@@ -38,7 +38,7 @@ class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
                     waitProcessing()
 
                     screenRecorder.stop {
-                        println("Writing finished")
+                        println("Writing finished: $fileName")
                         exit(0)
                     }
                 }
