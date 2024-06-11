@@ -22,7 +22,7 @@ There's a binary on github releases. You can download it from
 
 ## Usage
 
-```shell
+```
 Usage: capjoy [<options>] <command> [<args>]...
 
 Options:
