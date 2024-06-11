@@ -23,7 +23,7 @@ class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
 
                 val contentFilter = SCContentFilter(
                     display,
-                    excludingWindows = emptyList<Any>()
+                    excludingWindows = emptyList<Any>(),
                 )
                 startScreenRecord(fileName, contentFilter) { screenRecorder ->
                     waitProcessing()

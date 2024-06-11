@@ -30,7 +30,7 @@ class CaptureMixCommand : CliktCommand("Capture and mix mic audio and screen aud
 
             val contentFilter = SCContentFilter(
                 display,
-                excludingWindows = emptyList<Any>()
+                excludingWindows = emptyList<Any>(),
             )
             startScreenRecord(screenFile, contentFilter) { screenRecorder ->
                 waitProcessing()
