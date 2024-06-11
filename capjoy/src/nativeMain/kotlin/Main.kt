@@ -13,15 +13,15 @@ import com.github.ajalt.clikt.core.subcommands
 
 fun main(args: Array<String>) {
     CapjoyCommand().subcommands(
-        ListDisplaysCommand(),
         ListApplicationsCommand(),
-        ListWindowsCommand(),
         ListCaptureDevicesCommand(),
+        ListDisplaysCommand(),
+        ListWindowsCommand(),
+        CaptureAudioCommand(),
         CaptureImageCommand(),
         CaptureMicCommand(),
-        CaptureAudioCommand(),
-        MixCommand(),
         CaptureMixCommand(),
+        MixCommand(),
         VersionCommand(),
     ).main(args)
 }
