@@ -18,6 +18,18 @@ This is a simple CLI application, that captures image, video(Not implemented), a
 There's a binary on github releases. You can download it from
 [here](https://github.com/tokuhirom/capjoy/releases).
 
+### homebrew
+
+capjoy supports homebrew to install the app.
+Run the following command on your terminal.
+
+```shell
+brew install tokuhirom/formulae/capjoy
+```
+
+See. https://github.com/tokuhirom/homebrew-formulae/
+
+
 (TBD: i want to support the homebrew)
 
 ## Usage
