@@ -102,19 +102,10 @@ fun startScreenRecord(
     fileName: String,
     contentFilter: SCContentFilter,
     isVideo: Boolean,
+    scStreamConfiguration: SCStreamConfiguration,
     callback: (ScreenRecorder) -> Unit
 ) {
-    val captureConfiguration = SCStreamConfiguration().apply {
-        showsCursor = isVideo
-        capturesAudio = true
-        if (isVideo) {
-            width = 1920u
-            height = 1080u
-            minimumFrameInterval = CMTimeMake(value = 1, timescale = 30) // 30 FPS
-        }
-    }
-
-    val stream = SCStream(contentFilter, captureConfiguration, null)
+    val stream = SCStream(contentFilter, scStreamConfiguration, null)
 
     val assetWriter = createAssetWriter(fileName, isVideo)
 
