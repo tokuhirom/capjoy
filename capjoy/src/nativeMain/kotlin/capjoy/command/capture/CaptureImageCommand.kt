@@ -1,5 +1,9 @@
 package capjoy.command.capture
 
+import capjoy.recorder.captureScreenshot
+import capjoy.recorder.findDefaultDisplay
+import capjoy.recorder.findDisplayByDisplayId
+import capjoy.recorder.findWindowByWindowId
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
@@ -7,85 +11,138 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.long
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.autoreleasepool
 import kotlinx.cinterop.convert
-import kotlinx.cinterop.readValue
-import platform.CoreFoundation.CFStringCreateWithCString
-import platform.CoreFoundation.CFStringRef
-import platform.CoreFoundation.CFURLCreateWithFileSystemPath
-import platform.CoreFoundation.kCFAllocatorDefault
-import platform.CoreFoundation.kCFStringEncodingUTF8
-import platform.CoreFoundation.kCFURLPOSIXPathStyle
-import platform.CoreGraphics.CGRectNull
+import platform.AppKit.NSApplication
+import platform.AppKit.NSApplicationActivationPolicy
+import platform.AppKit.NSBitmapImageFileType
+import platform.AppKit.NSBitmapImageRep
+import platform.AppKit.NSImage
+import platform.AppKit.representationUsingType
+import platform.CoreGraphics.CGDirectDisplayID
 import platform.CoreGraphics.CGWindowID
-import platform.CoreGraphics.CGWindowListCreateImage
-import platform.CoreGraphics.kCGWindowImageDefault
-import platform.CoreGraphics.kCGWindowListOptionIncludingWindow
-import platform.CoreServices.kUTTypeJPEG
-import platform.CoreServices.kUTTypePNG
-import platform.ImageIO.CGImageDestinationAddImage
-import platform.ImageIO.CGImageDestinationCreateWithURL
-import platform.ImageIO.CGImageDestinationFinalize
+import platform.CoreMedia.CMTimeMake
+import platform.Foundation.writeToFile
+import platform.ScreenCaptureKit.SCContentFilter
+import platform.ScreenCaptureKit.SCStreamConfiguration
+import platform.posix.exit
 
 class CaptureImageCommand : CliktCommand(
-    "Capture an image of a window",
+    "Capture an image of a window or the entire display",
 ) {
-    // TODO support displayID
-    private val windowID: Long by argument().long()
-    private val path: String by argument()
-    private val format by option().choice("png", "jpg")
-        .default("png")
+    private val windowID: Long? by option(help = "Window ID to capture").long()
+    private val displayID: Long? by option(help = "Display ID to capture").long()
+    private val filename: String by argument()
+    private val format by option().choice("png", "jpg").default("png")
 
     @OptIn(ExperimentalForeignApi::class)
     override fun run() {
-        captureWindow(
-            windowID.convert(),
-            path,
-            when (format) {
-                "png" -> kUTTypePNG
-                "jpg" -> kUTTypeJPEG
+        autoreleasepool {
+            val app = NSApplication.sharedApplication()
+            app.setActivationPolicy(NSApplicationActivationPolicy.NSApplicationActivationPolicyRegular)
+            val fileType = when (format) {
+                "png" -> NSBitmapImageFileType.NSBitmapImageFileTypePNG
+                "jpg" -> NSBitmapImageFileType.NSBitmapImageFileTypeJPEG
                 else -> error("Unsupported format: $format")
-            },
-        )
+            }
+
+            println("Start capturing image to $filename")
+
+            when {
+                windowID != null -> {
+                    captureWindow(windowID!!.convert(), filename, fileType)
+                }
+
+                displayID != null -> {
+                    captureDisplay(displayID!!.convert(), filename, fileType)
+                }
+
+                else -> {
+                    captureDefaultDisplay(filename, fileType)
+                }
+            }
+
+            println("Starting the main run loop to process the asynchronous callback")
+            app.run()
+        }
     }
 
     @OptIn(ExperimentalForeignApi::class)
     fun captureWindow(
         windowID: CGWindowID,
         filePath: String,
-        imageFormat: CFStringRef?,
+        fileType: NSBitmapImageFileType,
     ) {
-        val image =
-            CGWindowListCreateImage(
-                CGRectNull.readValue(),
-                kCGWindowListOptionIncludingWindow,
-                windowID,
-                kCGWindowImageDefault,
-            )
-
-        if (image != null) {
-            val filePathCFString =
-                CFStringCreateWithCString(kCFAllocatorDefault, filePath, kCFStringEncodingUTF8)
-            val url =
-                CFURLCreateWithFileSystemPath(
-                    kCFAllocatorDefault,
-                    filePathCFString,
-                    kCFURLPOSIXPathStyle,
-                    false,
-                )
-
-            val destination = CGImageDestinationCreateWithURL(url, imageFormat, 1.convert(), null)
-            if (destination != null) {
-                CGImageDestinationAddImage(destination, image, null)
-                if (CGImageDestinationFinalize(destination)) {
-                    println("Image saved to $filePath")
-                } else {
-                    println("Failed to finalize image destination")
-                }
-            } else {
-                println("Failed to create image destination")
+        findWindowByWindowId(windowID) { window ->
+            val filter = SCContentFilter(desktopIndependentWindow = window)
+            val configuration = SCStreamConfiguration().apply {
+                minimumFrameInterval = CMTimeMake(value = 1, timescale = 30)
+                showsCursor = false
             }
-        } else {
-            println("Failed to create image")
+            startScreenCapture(filePath, filter, configuration, fileType)
         }
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    fun captureDisplay(
+        displayID: CGDirectDisplayID,
+        filePath: String,
+        fileType: NSBitmapImageFileType,
+    ) {
+        findDisplayByDisplayId(displayID.toLong()) { display, apps ->
+            val filter = SCContentFilter(
+                display = display,
+                includingApplications = apps,
+                exceptingWindows = emptyList<Any>()
+            )
+            val configuration = SCStreamConfiguration().apply {
+                minimumFrameInterval = CMTimeMake(value = 1, timescale = 30)
+                showsCursor = false
+            }
+            startScreenCapture(filePath, filter, configuration, fileType)
+        }
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    fun captureDefaultDisplay(
+        filePath: String,
+        fileType: NSBitmapImageFileType,
+    ) {
+        findDefaultDisplay { display, apps ->
+            val filter = SCContentFilter(
+                display = display,
+                includingApplications = apps,
+                exceptingWindows = emptyList<Any>()
+            )
+            val configuration = SCStreamConfiguration().apply {
+                minimumFrameInterval = CMTimeMake(value = 1, timescale = 30)
+                showsCursor = false
+            }
+            startScreenCapture(filePath, filter, configuration, fileType)
+        }
+    }
+
+    private fun startScreenCapture(
+        filePath: String,
+        contentFilter: SCContentFilter,
+        scStreamConfiguration: SCStreamConfiguration,
+        fileType: NSBitmapImageFileType
+    ) {
+        captureScreenshot(contentFilter, scStreamConfiguration) { image ->
+            println("Image saved to $filePath")
+            saveImageToFile(image, filePath, fileType)
+            exit(0)
+        }
+    }
+
+    private fun saveImageToFile(image: NSImage, filePath: String, fileFormat: NSBitmapImageFileType): Boolean {
+        val imageData = image.TIFFRepresentation ?: return false
+        val bitmapImageRep = NSBitmapImageRep(data = imageData) ?: return false
+        val pngData = bitmapImageRep.representationUsingType(
+            fileFormat,
+            properties = emptyMap<Any?, Any>()
+        )
+
+        return pngData?.writeToFile(filePath, atomically = true) ?: false
     }
 }

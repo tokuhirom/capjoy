@@ -50,7 +50,7 @@ class CaptureVideoCommand : CliktCommand(
 
             memScoped {
                 if (windowID != null) {
-                    findWindowByWindowId(windowID!!) { window ->
+                    findWindowByWindowId(windowID!!.toUInt()) { window ->
                         recordVideoFromWindow(window)
                     }
                 } else if (displayID != null) {
