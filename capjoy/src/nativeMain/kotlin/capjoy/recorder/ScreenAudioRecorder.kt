@@ -287,7 +287,7 @@ data class ScreenRecorder(
 fun captureScreenshot(
     contentFilter: SCContentFilter,
     scStreamConfiguration: SCStreamConfiguration,
-    callback: (NSImage) -> Unit
+    callback: (NSImage) -> Unit,
 ) {
     val stream = SCStream(contentFilter, scStreamConfiguration, null)
 
@@ -295,7 +295,7 @@ fun captureScreenshot(
         override fun stream(
             stream: SCStream,
             didOutputSampleBuffer: CMSampleBufferRef?,
-            ofType: SCStreamOutputType
+            ofType: SCStreamOutputType,
         ) {
             if (!CMSampleBufferIsValid(didOutputSampleBuffer)) {
                 eprintln("Invalid sample buffer")
@@ -324,7 +324,7 @@ fun captureScreenshot(
         streamOutput,
         SCStreamOutputType.SCStreamOutputTypeScreen,
         sampleHandlerQueue = null,
-        error = null
+        error = null,
     )
 
     stream.startCaptureWithCompletionHandler { error ->

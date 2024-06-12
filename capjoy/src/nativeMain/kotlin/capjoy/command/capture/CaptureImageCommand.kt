@@ -93,7 +93,7 @@ class CaptureImageCommand : CliktCommand(
             val filter = SCContentFilter(
                 display = display,
                 includingApplications = apps,
-                exceptingWindows = emptyList<Any>()
+                exceptingWindows = emptyList<Any>(),
             )
             val configuration = SCStreamConfiguration().apply {
                 minimumFrameInterval = CMTimeMake(value = 1, timescale = 30)
@@ -112,7 +112,7 @@ class CaptureImageCommand : CliktCommand(
             val filter = SCContentFilter(
                 display = display,
                 includingApplications = apps,
-                exceptingWindows = emptyList<Any>()
+                exceptingWindows = emptyList<Any>(),
             )
             val configuration = SCStreamConfiguration().apply {
                 minimumFrameInterval = CMTimeMake(value = 1, timescale = 30)
@@ -126,7 +126,7 @@ class CaptureImageCommand : CliktCommand(
         filePath: String,
         contentFilter: SCContentFilter,
         scStreamConfiguration: SCStreamConfiguration,
-        fileType: NSBitmapImageFileType
+        fileType: NSBitmapImageFileType,
     ) {
         captureScreenshot(contentFilter, scStreamConfiguration) { image ->
             println("Image saved to $filePath")
@@ -135,12 +135,16 @@ class CaptureImageCommand : CliktCommand(
         }
     }
 
-    private fun saveImageToFile(image: NSImage, filePath: String, fileFormat: NSBitmapImageFileType): Boolean {
+    private fun saveImageToFile(
+        image: NSImage,
+        filePath: String,
+        fileFormat: NSBitmapImageFileType,
+    ): Boolean {
         val imageData = image.TIFFRepresentation ?: return false
         val bitmapImageRep = NSBitmapImageRep(data = imageData) ?: return false
         val pngData = bitmapImageRep.representationUsingType(
             fileFormat,
-            properties = emptyMap<Any?, Any>()
+            properties = emptyMap<Any?, Any>(),
         )
 
         return pngData?.writeToFile(filePath, atomically = true) ?: false
