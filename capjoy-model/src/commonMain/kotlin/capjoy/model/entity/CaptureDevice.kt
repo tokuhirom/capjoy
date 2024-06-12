@@ -49,4 +49,5 @@ data class CaptureDevice(
     val suspended: Boolean,
     val transportType: Int,
     val uniqueID: String,
+    val default: Boolean,
 )

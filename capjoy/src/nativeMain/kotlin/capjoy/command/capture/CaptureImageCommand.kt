@@ -10,6 +10,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.long
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.autoreleasepool
 import kotlinx.cinterop.convert
@@ -32,10 +33,10 @@ class CaptureImageCommand : CliktCommand(
 ) {
     private val windowID: Long? by option(help = "Window ID to capture").long()
     private val displayID: Long? by option(help = "Display ID to capture").long()
-    private val filename: String by argument()
+    private val fileName: String by argument()
     private val format by option().choice("png", "jpg").default("png")
 
-    @OptIn(ExperimentalForeignApi::class)
+    @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
     override fun run() {
         autoreleasepool {
             val app = NSApplication.sharedApplication()
@@ -46,19 +47,19 @@ class CaptureImageCommand : CliktCommand(
                 else -> error("Unsupported format: $format")
             }
 
-            println("Start capturing image to $filename")
+            println("Start capturing image to $fileName")
 
             when {
                 windowID != null -> {
-                    captureWindow(windowID!!.convert(), filename, fileType)
+                    captureWindow(windowID!!.convert(), fileName, fileType)
                 }
 
                 displayID != null -> {
-                    captureDisplay(displayID!!.convert(), filename, fileType)
+                    captureDisplay(displayID!!.convert(), fileName, fileType)
                 }
 
                 else -> {
-                    captureDefaultDisplay(filename, fileType)
+                    captureDefaultDisplay(fileName, fileType)
                 }
             }
 
