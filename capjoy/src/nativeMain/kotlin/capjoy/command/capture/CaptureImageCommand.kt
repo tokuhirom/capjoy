@@ -29,6 +29,7 @@ import platform.ImageIO.CGImageDestinationFinalize
 class CaptureImageCommand : CliktCommand(
     "Capture an image of a window",
 ) {
+    // TODO support displayID
     private val windowID: Long by argument().long()
     private val path: String by argument()
     private val format by option().choice("png", "jpg")

@@ -5,9 +5,12 @@ import capjoy.recorder.findDefaultDisplay
 import capjoy.recorder.mix
 import capjoy.recorder.startAudioRecording
 import capjoy.recorder.startScreenRecord
-import capjoy.waitProcessing
+import capjoy.utils.DURATION_HELP
+import capjoy.utils.WAITING_HELP
+import capjoy.utils.waitProcessing
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.option
 import platform.AVFoundation.AVFileTypeMPEG4
 import platform.Foundation.NSRunLoop
 import platform.Foundation.run
@@ -15,8 +18,12 @@ import platform.ScreenCaptureKit.SCContentFilter
 import platform.ScreenCaptureKit.SCStreamConfiguration
 import platform.posix.unlink
 
-class CaptureMixCommand : CliktCommand("Capture and mix mic audio and screen audio into a single file") {
+class CaptureMixCommand : CliktCommand(
+    "Capture and mix mic audio and screen audio into a single file",
+    epilog = WAITING_HELP,
+) {
     private val outFileName: String by argument()
+    private val duration: String? by option(help = DURATION_HELP)
 
     override fun run() {
         val micFile = createTempFile("capjoy-mix-mic-", ".m4a")
@@ -43,7 +50,7 @@ class CaptureMixCommand : CliktCommand("Capture and mix mic audio and screen aud
                 enableAudio = true,
                 captureConfiguration,
             ) { screenRecorder ->
-                waitProcessing()
+                waitProcessing(duration)
 
                 micRecorder.stop()
 

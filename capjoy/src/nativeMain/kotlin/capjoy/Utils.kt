@@ -21,12 +21,6 @@ fun createTempFile(
     return filePath
 }
 
-fun waitProcessing() {
-    println("Please press Enter to stop capturing process.")
-    readlnOrNull()
-    println("User input received.")
-}
-
 @OptIn(ExperimentalForeignApi::class)
 fun eprintln(message: String) {
     // print to stderr

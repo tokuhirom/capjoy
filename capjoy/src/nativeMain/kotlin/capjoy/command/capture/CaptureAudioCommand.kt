@@ -2,9 +2,12 @@ package capjoy.command.capture
 
 import capjoy.recorder.findDefaultDisplay
 import capjoy.recorder.startScreenRecord
-import capjoy.waitProcessing
+import capjoy.utils.DURATION_HELP
+import capjoy.utils.WAITING_HELP
+import capjoy.utils.waitProcessing
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.option
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.memScoped
 import platform.Foundation.NSRunLoop
@@ -14,8 +17,12 @@ import platform.ScreenCaptureKit.SCStreamConfiguration
 import platform.posix.exit
 
 @OptIn(ExperimentalForeignApi::class)
-class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
+class CaptureAudioCommand : CliktCommand(
+    "Capture audio from the screen",
+    epilog = WAITING_HELP,
+) {
     private val fileName: String by argument()
+    private val duration: String? by option(help = DURATION_HELP)
 
     override fun run() {
         memScoped {
@@ -36,7 +43,7 @@ class CaptureAudioCommand : CliktCommand("Capture audio from the screen") {
                     enableAudio = true,
                     captureConfiguration,
                 ) { screenRecorder ->
-                    waitProcessing()
+                    waitProcessing(duration)
 
                     screenRecorder.stop {
                         println("Writing finished: $fileName")
