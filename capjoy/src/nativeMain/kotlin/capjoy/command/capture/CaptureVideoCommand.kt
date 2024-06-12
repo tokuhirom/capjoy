@@ -47,9 +47,10 @@ class CaptureVideoCommand : CliktCommand(
                     println("Window found: $window, title=${window.title}, ${window.owningApplication?.bundleIdentifier}")
 
                     val contentFilter = SCContentFilter(desktopIndependentWindow = window)
+                    val optShowsCursor = showsCursor
                     val captureConfiguration = SCStreamConfiguration().apply {
-                        println("Configuring SCStreamConfiguration(showsCursor=$showsCursor)...")
-                        this.showsCursor = showsCursor
+                        println("Configuring SCStreamConfiguration(showsCursor=$optShowsCursor)...")
+                        this.showsCursor = optShowsCursor
                         capturesAudio = true
                         width = CGRectGetWidth(window.frame()).toULong()
                         height = CGRectGetHeight(window.frame()).toULong()
