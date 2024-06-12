@@ -54,12 +54,12 @@ class CaptureVideoCommand : CliktCommand(
                         recordVideoFromWindow(window)
                     }
                 } else if (displayID != null) {
-                    findDisplayByDisplayId(displayID!!) { display ->
-                        recordVideoFromDisplay(display)
+                    findDisplayByDisplayId(displayID!!) { display, applications ->
+                        recordVideoFromDisplay(display, applications)
                     }
                 } else {
-                    findDefaultDisplay { display ->
-                        recordVideoFromDisplay(display)
+                    findDefaultDisplay { display, applications ->
+                        recordVideoFromDisplay(display, applications)
                     }
                 }
             }
@@ -74,7 +74,7 @@ class CaptureVideoCommand : CliktCommand(
         return SCStreamConfiguration().apply {
             println("Configuring SCStreamConfiguration(showsCursor=$optShowsCursor)...")
             this.showsCursor = optShowsCursor
-            capturesAudio = true
+            capturesAudio = audio
             minimumFrameInterval = CMTimeMake(value = 1, timescale = 30) // 30 FPS
         }
     }
@@ -91,9 +91,20 @@ class CaptureVideoCommand : CliktCommand(
         recordVideo(contentFilter, captureConfiguration)
     }
 
-    private fun recordVideoFromDisplay(display: SCDisplay) {
+    // To capture the entire display with ScreenCaptureKit, use initWithDisplay:includingApplications:exceptingWindows:
+    // instead of initWithDisplay:excludingWindows: with an empty list, as the latter does not work correctly.
+    // This workaround involves listing all running applications.
+    // For more details, see: https://federicoterzi.com/blog/screencapturekit-failing-to-capture-the-entire-display/
+    private fun recordVideoFromDisplay(
+        display: SCDisplay,
+        applications: List<*>,
+    ) {
         println("Display found: ${display.displayID}, ${display.width}x${display.height} - ${display.description}")
-        val contentFilter = SCContentFilter(display, excludingWindows = emptyList<Any>())
+        val contentFilter = SCContentFilter(
+            display = display,
+            includingApplications = applications,
+            exceptingWindows = emptyList<Any>(),
+        )
         val captureConfiguration = buildConfiguration().apply {
             width = display.width.convert()
             height = display.height.convert()
@@ -102,7 +113,10 @@ class CaptureVideoCommand : CliktCommand(
         recordVideo(contentFilter, captureConfiguration)
     }
 
-    private fun recordVideo(contentFilter: SCContentFilter, captureConfiguration: SCStreamConfiguration) {
+    private fun recordVideo(
+        contentFilter: SCContentFilter,
+        captureConfiguration: SCStreamConfiguration,
+    ) {
         startScreenRecord(
             fileName,
             contentFilter,

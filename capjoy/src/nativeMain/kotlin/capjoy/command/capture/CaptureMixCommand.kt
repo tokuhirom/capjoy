@@ -33,7 +33,7 @@ class CaptureMixCommand : CliktCommand(
 
         val micRecorder = startAudioRecording(AVFileTypeMPEG4, micFile)
         println("Started micRecorder...")
-        findDefaultDisplay { display ->
+        findDefaultDisplay { display, _ ->
             println("Display found: $display")
 
             val contentFilter = SCContentFilter(

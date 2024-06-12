@@ -26,7 +26,7 @@ class CaptureAudioCommand : CliktCommand(
 
     override fun run() {
         memScoped {
-            findDefaultDisplay { display ->
+            findDefaultDisplay { display, _ ->
                 println("Display found: $display")
 
                 val contentFilter = SCContentFilter(

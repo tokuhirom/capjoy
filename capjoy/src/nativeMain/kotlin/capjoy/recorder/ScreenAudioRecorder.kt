@@ -37,7 +37,7 @@ import platform.ScreenCaptureKit.SCWindow
 import platform.darwin.NSObject
 import platform.posix.exit
 
-fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
+fun findDefaultDisplay(displayCallback: (SCDisplay, List<*>) -> Unit) {
     SCShareableContent.getShareableContentWithCompletionHandler { content, error ->
         if (error != null) {
             println("Error getting shareable content: ${error.localizedDescription}")
@@ -50,13 +50,13 @@ fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
             return@getShareableContentWithCompletionHandler
         }
 
-        displayCallback(display)
+        displayCallback(display, content.applications)
     }
 }
 
 fun findDisplayByDisplayId(
     displayId: Long,
-    displayCallback: (SCDisplay) -> Unit,
+    displayCallback: (SCDisplay, List<*>) -> Unit,
 ) {
     SCShareableContent.getShareableContentWithCompletionHandler { content, error ->
         if (error != null) {
@@ -68,7 +68,7 @@ fun findDisplayByDisplayId(
             display is SCDisplay && display.displayID.toLong() == displayId
         }
         if (display != null && display is SCDisplay) {
-            displayCallback(display)
+            displayCallback(display, content.applications)
         } else {
             println("No display found for display id: $displayId")
             exit(1)
