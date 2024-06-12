@@ -32,13 +32,11 @@ fun handleContent(callback: (SCShareableContent) -> Unit) {
     autoreleasepool {
         SCShareableContent.getShareableContentWithCompletionHandler { content: SCShareableContent?, error ->
             if (error != null) {
-                eprintln("Error in getShareableContentWithCompletionHandler: ${error.localizedDescription}")
-                exit(1)
+                error("Error in getShareableContentWithCompletionHandler: ${error.localizedDescription}")
             }
 
             if (content == null) {
-                eprintln("No content found.")
-                exit(1)
+                error("No content found.")
             } else {
                 callback(content)
             }
