@@ -54,6 +54,28 @@ fun findDefaultDisplay(displayCallback: (SCDisplay) -> Unit) {
     }
 }
 
+fun findDisplayByDisplayId(
+    displayId: Long,
+    displayCallback: (SCDisplay) -> Unit,
+) {
+    SCShareableContent.getShareableContentWithCompletionHandler { content, error ->
+        if (error != null) {
+            println("Error getting shareable content: ${error.localizedDescription}")
+            return@getShareableContentWithCompletionHandler
+        }
+
+        val display = content?.displays?.firstOrNull { display ->
+            display is SCDisplay && display.displayID.toLong() == displayId
+        }
+        if (display != null && display is SCDisplay) {
+            displayCallback(display)
+        } else {
+            println("No display found for display id: $displayId")
+            exit(1)
+        }
+    }
+}
+
 fun findWindowByWindowId(
     windowId: Long,
     windowCallback: (SCWindow) -> Unit,
