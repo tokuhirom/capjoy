@@ -2,12 +2,18 @@ package capjoy.command.list.utils
 
 import kotlin.math.max
 
-fun showTable(headers: List<String>, rows: List<List<String>>) {
+fun showTable(
+    headers: List<String>,
+    rows: List<List<String>>,
+) {
     val colWidths = headers.mapIndexed { index, header ->
         max(header.length, rows.maxOfOrNull { it[index].length } ?: 0)
     }
 
-    fun padString(value: String, length: Int): String {
+    fun padString(
+        value: String,
+        length: Int,
+    ): String {
         return value.padEnd(length, ' ')
     }
 
@@ -26,11 +32,10 @@ fun showTable(headers: List<String>, rows: List<List<String>>) {
     }
 }
 
-
 fun filterTableCols(
     filterHeaders: List<String>,
     headers: List<String>,
-    rows: List<List<String>>
+    rows: List<List<String>>,
 ): Pair<List<String>, List<List<String>>> {
     val indices = filterHeaders.map { headers.indexOf(it) }.filter { it != -1 }
     val filteredHeaders = indices.map { headers[it] }

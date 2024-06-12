@@ -62,7 +62,7 @@ class ListWindowsCommand : CliktCommand(
                         "Process ID",
                         "Bundle ID",
                         "App Name",
-                        "Title"
+                        "Title",
                     )
                     val rows = got.map {
                         listOf(
@@ -83,9 +83,10 @@ class ListWindowsCommand : CliktCommand(
                                 "Window ID",
                                 "Bundle ID",
                                 "App Name",
-                                "Title"
+                                "Title",
                             ),
-                            headers, rows
+                            headers,
+                            rows,
                         )
                         showTable(filteredHeaders, filteredRows)
                     }
