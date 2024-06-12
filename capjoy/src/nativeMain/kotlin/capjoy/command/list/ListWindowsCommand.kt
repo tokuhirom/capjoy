@@ -3,6 +3,7 @@ package capjoy.command.list
 import capjoy.command.list.utils.filterTableCols
 import capjoy.command.list.utils.showTable
 import capjoy.handleContent
+import capjoy.model.command.ListWindowsOutput
 import capjoy.model.entity.Window
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
@@ -52,7 +53,7 @@ class ListWindowsCommand : CliktCommand(
                     )
                 }
             when (format) {
-                "json" -> println(json.encodeToString(got))
+                "json" -> println(json.encodeToString(ListWindowsOutput(got)))
                 "table" -> {
                     val headers = listOf(
                         "Window ID",

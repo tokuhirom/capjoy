@@ -2,6 +2,7 @@ package capjoy.command.list
 
 import capjoy.command.list.utils.showTable
 import capjoy.handleContent
+import capjoy.model.command.ListDisplayOutput
 import capjoy.model.entity.Display
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
@@ -41,7 +42,7 @@ class ListDisplaysCommand : CliktCommand(
                     )
                 }
             when (format) {
-                "json" -> println(json.encodeToString(got))
+                "json" -> println(json.encodeToString(ListDisplayOutput(got)))
                 "table" -> {
                     val headers = listOf(
                         "Display ID",
