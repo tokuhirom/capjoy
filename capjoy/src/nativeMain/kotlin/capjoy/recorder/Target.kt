@@ -16,7 +16,11 @@ data class Target(
 )
 
 @OptIn(ExperimentalForeignApi::class)
-fun findTarget(displayId: UInt?, windowId: UInt?, targetCallback: (Target) -> Unit) {
+fun findTarget(
+    displayId: UInt?,
+    windowId: UInt?,
+    targetCallback: (Target) -> Unit,
+) {
     if (windowId != null) {
         findWindowByWindowId(windowId) { window ->
             println("Window ${window.windowID}")
@@ -26,7 +30,10 @@ fun findTarget(displayId: UInt?, windowId: UInt?, targetCallback: (Target) -> Un
             targetCallback(Target(contentFilter, width, height))
         }
     } else {
-        fun buildTarget(display: SCDisplay, apps: List<*>): Target {
+        fun buildTarget(
+            display: SCDisplay,
+            apps: List<*>,
+        ): Target {
             println("Display ${display.displayID}")
             // To capture the entire display with ScreenCaptureKit, use initWithDisplay:includingApplications:exceptingWindows:
             // instead of initWithDisplay:excludingWindows: with an empty list, as the latter does not work correctly.
