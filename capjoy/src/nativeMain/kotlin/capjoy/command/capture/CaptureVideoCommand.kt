@@ -100,7 +100,10 @@ class CaptureVideoCommand : CliktCommand(
         applications: List<*>,
     ) {
         // TODO: this routine is not stable...
-        println("Display found: ${display.displayID}, ${display.width}x${display.height} - ${display.description} applications=${applications.size}")
+        println(
+            "Display found: ${display.displayID}, ${display.width}x${display.height} - ${display.description}" +
+                " applications=${applications.size}",
+        )
         val contentFilter = SCContentFilter(
             display = display,
             includingApplications = applications,
