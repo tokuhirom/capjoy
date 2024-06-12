@@ -1,36 +1,31 @@
-# capjoy
+# Capjoy
 
-![image](https://github.com/tokuhirom/capjoy/assets/21084/83703ef3-e27d-4d48-a0c1-b0e9ab361d39)
+![Capjoy Logo](https://github.com/tokuhirom/capjoy/assets/21084/83703ef3-e27d-4d48-a0c1-b0e9ab361d39)
 
 ## Description
 
-This is a simple CLI application, that captures image, video, audio from your Mac.
+Capjoy is a simple CLI application for capturing images, videos, and audio on your Mac.
 
-## Use case
+## Use Cases
 
-- Record the mic audio to a file
-- Record the screen as a video
-- Capture the screen as an image
-- Record the audio from the applications and mic. And mix it.
+- Record microphone audio to a file.
+- Record the screen as a video.
+- Capture the screen as an image.
+- Record audio from applications and the microphone, and mix them.
 
-## Install
+## Installation
 
-There's a binary on github releases. You can download it from
-[here](https://github.com/tokuhirom/capjoy/releases).
+Download the binary from the [GitHub releases page](https://github.com/tokuhirom/capjoy/releases).
 
-### homebrew
+### Homebrew
 
-capjoy supports homebrew to install the app.
-Run the following command on your terminal.
+Capjoy supports installation via Homebrew. Run the following command in your terminal:
 
 ```shell
 brew install tokuhirom/formulae/capjoy
 ```
 
-See. https://github.com/tokuhirom/homebrew-formulae/
-
-
-(TBD: i want to support the homebrew)
+See [this repository](https://github.com/tokuhirom/homebrew-formulae) for more information.
 
 ## Usage
 
@@ -55,31 +50,33 @@ Commands:
   version               Print the version of Capjoy.
 ```
 
-## Permission
+## Permissions
 
-This application requires the permissions to capture screen and/or audio.
-Please allow it.
+This application requires permissions to capture the screen and/or audio. Please allow these permissions when
+prompted.
 
-## LICENSE
+## License
 
-    The MIT License (MIT)
-    
-    Copyright © 2024 Tokuhiro Matsuno, http://64p.org/ <tokuhirom@gmail.com>
-    
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the “Software”), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-    
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-    
-    THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
+```
+The MIT License (MIT)
+
+Copyright © 2024 Tokuhiro Matsuno, http://64p.org/ <tokuhirom@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
