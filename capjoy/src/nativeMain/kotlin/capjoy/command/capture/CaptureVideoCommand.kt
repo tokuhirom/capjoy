@@ -2,7 +2,9 @@ package capjoy.command.capture
 
 import capjoy.recorder.findWindowByWindowId
 import capjoy.recorder.startScreenRecord
-import capjoy.waitProcessing
+import capjoy.utils.DURATION_HELP
+import capjoy.utils.WAITING_HELP
+import capjoy.utils.waitProcessing
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
@@ -24,11 +26,15 @@ import platform.ScreenCaptureKit.SCStreamConfiguration
 import platform.posix.exit
 
 @OptIn(ExperimentalForeignApi::class)
-class CaptureVideoCommand : CliktCommand("Capture video and audio from the screen") {
+class CaptureVideoCommand : CliktCommand(
+    "Capture video and audio from the screen",
+    epilog = WAITING_HELP,
+) {
     private val fileName: String by argument()
     private val showsCursor: Boolean by option().boolean().default(false)
     private val audio: Boolean by option().boolean().help("Enable audio recording").default(true)
     private val windowID: Long by argument().long()
+    private val duration: String? by option(help = DURATION_HELP)
 
     @OptIn(BetaInteropApi::class)
     override fun run() {
@@ -58,7 +64,7 @@ class CaptureVideoCommand : CliktCommand("Capture video and audio from the scree
                         enableAudio = audio,
                         captureConfiguration,
                     ) { screenRecorder ->
-                        waitProcessing()
+                        waitProcessing(duration)
 
                         screenRecorder.stop {
                             println("Writing finished: $fileName")
