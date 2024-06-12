@@ -16,7 +16,7 @@ import platform.AVFoundation.AVCaptureDeviceFormat
 import platform.AVFoundation.AVMediaTypeAudio
 import platform.AVFoundation.AVMediaTypeVideo
 
-class ListCaptureDevicesCommand : CliktCommand(
+class ListDevicesCommand : CliktCommand(
     "List all capture devices",
 ) {
     private val format by option().choice("json", "table").default("table")

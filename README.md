@@ -36,18 +36,18 @@ Options:
   -h, --help  Show this message and exit
 
 Commands:
-  list-applications     List all running applications
-  list-capture-devices  List all capture devices
-  list-displays         List all displays
-  list-windows          List all windows
-  capture-audio         Capture audio from the screen
-  capture-image         Capture an image of a window
-  capture-mic           Capture audio from the default input device
-  capture-mix           Capture and mix mic audio and screen audio into a
-                        single file
-  capture-video         Capture video and audio from the screen
-  mix                   Mix audio files
-  version               Print the version of Capjoy.
+  list-applications  List all running applications
+  list-devices       List all capture devices
+  list-displays      List all displays
+  list-windows       List all windows
+  capture-audio      Capture audio from the screen
+  capture-image      Capture an image of a window or the entire display
+  capture-mic        Capture audio from the default input device
+  capture-mix        Capture and mix mic audio and screen audio into a single
+                     file
+  capture-video      Capture video and audio from the screen
+  mix                Mix audio files
+  version            Print the version of Capjoy.
 ```
 
 ## Permissions
