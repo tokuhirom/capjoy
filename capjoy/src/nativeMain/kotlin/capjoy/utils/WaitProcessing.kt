@@ -14,7 +14,7 @@ fun waitProcessing(durationString: String?) {
         } catch (e: Exception) {
             error(
                 "Invalid duration format: $durationString\n" +
-                        "Supported format is: 10s, 1h 30m, 1h 30m 30s, etc."
+                    "Supported format is: 10s, 1h 30m, 1h 30m 30s, etc.",
             )
         }
         val seconds = duration.inWholeSeconds.toUInt()
