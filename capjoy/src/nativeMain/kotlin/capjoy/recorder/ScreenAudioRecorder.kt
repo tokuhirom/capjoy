@@ -20,11 +20,16 @@ import platform.AVFoundation.AVVideoHeightKey
 import platform.AVFoundation.AVVideoProfileLevelH264HighAutoLevel
 import platform.AVFoundation.AVVideoProfileLevelKey
 import platform.AVFoundation.AVVideoWidthKey
+import platform.AppKit.NSCIImageRep
+import platform.AppKit.NSImage
 import platform.CoreAudioTypes.kAudioFormatMPEG4AAC
+import platform.CoreImage.CIImage
 import platform.CoreMedia.CMClockGetHostTimeClock
 import platform.CoreMedia.CMClockGetTime
+import platform.CoreMedia.CMSampleBufferGetImageBuffer
 import platform.CoreMedia.CMSampleBufferIsValid
 import platform.CoreMedia.CMSampleBufferRef
+import platform.CoreVideo.CVImageBufferRef
 import platform.Foundation.NSURL
 import platform.ScreenCaptureKit.SCContentFilter
 import platform.ScreenCaptureKit.SCDisplay
@@ -77,7 +82,7 @@ fun findDisplayByDisplayId(
 }
 
 fun findWindowByWindowId(
-    windowId: Long,
+    windowId: UInt,
     windowCallback: (SCWindow) -> Unit,
 ) {
     SCShareableContent.getShareableContentWithCompletionHandler { content, error ->
@@ -87,7 +92,7 @@ fun findWindowByWindowId(
         }
 
         val window = content?.windows?.firstOrNull { window ->
-            window is SCWindow && window.windowID.toLong() == windowId
+            window is SCWindow && window.windowID == windowId
         }
         if (window != null && window is SCWindow) {
             windowCallback(window)
@@ -274,6 +279,59 @@ data class ScreenRecorder(
                     callback()
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun captureScreenshot(
+    contentFilter: SCContentFilter,
+    scStreamConfiguration: SCStreamConfiguration,
+    callback: (NSImage) -> Unit,
+) {
+    val stream = SCStream(contentFilter, scStreamConfiguration, null)
+
+    val streamOutput = object : NSObject(), SCStreamOutputProtocol {
+        override fun stream(
+            stream: SCStream,
+            didOutputSampleBuffer: CMSampleBufferRef?,
+            ofType: SCStreamOutputType,
+        ) {
+            if (!CMSampleBufferIsValid(didOutputSampleBuffer)) {
+                eprintln("Invalid sample buffer")
+                return
+            }
+
+            if (ofType == SCStreamOutputType.SCStreamOutputTypeScreen) {
+                val imageBuffer: CVImageBufferRef = CMSampleBufferGetImageBuffer(didOutputSampleBuffer)!!
+                val ciImage = CIImage(cVImageBuffer = imageBuffer)
+                val rep = NSCIImageRep(ciImage)
+                val nsImage = NSImage(size = rep.size)
+                nsImage.addRepresentation(rep)
+                callback(nsImage)
+                stream.stopCaptureWithCompletionHandler { error ->
+                    if (error != null) {
+                        println("Failed to stop capture: ${error.localizedDescription}")
+                    } else {
+                        println("Capture stopped")
+                    }
+                }
+            }
+        }
+    }
+
+    stream.addStreamOutput(
+        streamOutput,
+        SCStreamOutputType.SCStreamOutputTypeScreen,
+        sampleHandlerQueue = null,
+        error = null,
+    )
+
+    stream.startCaptureWithCompletionHandler { error ->
+        if (error != null) {
+            println("Failed to start capture: ${error.localizedDescription}")
+        } else {
+            println("Capture started successfully")
         }
     }
 }
