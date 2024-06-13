@@ -103,14 +103,19 @@ class Process(
     private val output: StringBuilder,
     private val errorOutput: StringBuilder,
 ) {
-    fun wait(): Pair<Int, String> {
-        val exitCode = waitForProcess(pid)
-        return exitCode to "stdout: $output\nstderr: $errorOutput"
+    fun readStdout(): String = output.toString()
+    fun readStderr(): String = errorOutput.toString()
+
+    fun wait(): Int {
+        return waitForProcess(pid)
     }
 }
 
 fun runCommand(command: String): Pair<Int, String> {
     val builder = ProcessBuilder(command)
     val process = builder.start()
-    return process.wait()
+    val stdout = process.readStdout()
+    val stderr = process.readStderr()
+    val exitCode = process.wait()
+    return exitCode to "stdout: $stdout\nstderr: $stderr"
 }
