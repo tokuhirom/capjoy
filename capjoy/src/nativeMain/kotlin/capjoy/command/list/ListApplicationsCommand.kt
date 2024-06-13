@@ -19,7 +19,7 @@ class ListApplicationsCommand : CliktCommand(
     private val format by option().choice("json", "table").default("table")
     private val json =
         Json {
-            prettyPrint = true
+            encodeDefaults = true
         }
 
     @BetaInteropApi

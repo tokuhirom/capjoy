@@ -8,7 +8,6 @@ import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.refTo
-import kotlinx.cinterop.toKString
 import kotlinx.cinterop.value
 import platform.posix.STDERR_FILENO
 import platform.posix.STDOUT_FILENO
@@ -35,7 +34,7 @@ fun waitForProcess(pid: Int): Int {
 
 class ProcessBuilder(val command: String) {
     @OptIn(ExperimentalForeignApi::class)
-    fun start(): Process {
+    fun start(enableDebugging: Boolean = false): Process {
         println("Running '$command'")
         memScoped {
             val stdoutPipe = allocArray<IntVar>(2)
@@ -76,8 +75,10 @@ class ProcessBuilder(val command: String) {
                 while (true) {
                     val bytesRead = read(stdoutPipe[0], buffer.refTo(0), buffer.size.toULong())
                     if (bytesRead <= 0) break
-                    val got = buffer.toKString()
-                    println(got)
+                    val got = buffer.decodeToString(0, bytesRead.toInt())
+                    if (enableDebugging) {
+                        println(got)
+                    }
                     output.append(got)
                 }
                 close(stdoutPipe[0])
@@ -85,8 +86,10 @@ class ProcessBuilder(val command: String) {
                 while (true) {
                     val bytesRead = read(stderrPipe[0], buffer.refTo(0), buffer.size.toULong())
                     if (bytesRead <= 0) break
-                    val got = buffer.toKString()
-                    println(got)
+                    val got = buffer.decodeToString(0, bytesRead.toInt())
+                    if (enableDebugging) {
+                        println(got)
+                    }
                     errorOutput.append(got)
                 }
                 close(stderrPipe[0])

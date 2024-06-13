@@ -1,7 +1,7 @@
 package capjoy.command.list
 
 import capjoy.command.list.utils.showTable
-import capjoy.model.command.ListCaptureDevicesOutput
+import capjoy.model.command.ListDevicesOutput
 import capjoy.model.entity.CaptureDevice
 import capjoy.model.entity.CaptureDeviceFormat
 import com.github.ajalt.clikt.core.CliktCommand
@@ -50,7 +50,7 @@ class ListDevicesCommand : CliktCommand(
             )
         }
         when (format) {
-            "json" -> println(json.encodeToString(ListCaptureDevicesOutput(got)))
+            "json" -> println(json.encodeToString(ListDevicesOutput(got)))
             "table" -> {
                 val headers = listOf(
                     "LocalizedName",
