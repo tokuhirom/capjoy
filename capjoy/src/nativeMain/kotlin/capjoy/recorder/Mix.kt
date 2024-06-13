@@ -7,6 +7,7 @@ import platform.AVFoundation.AVAssetExportSessionStatusCancelled
 import platform.AVFoundation.AVAssetExportSessionStatusCompleted
 import platform.AVFoundation.AVAssetExportSessionStatusFailed
 import platform.AVFoundation.AVAssetTrack
+import platform.AVFoundation.AVFileType
 import platform.AVFoundation.AVFileTypeAppleM4A
 import platform.AVFoundation.AVMediaTypeAudio
 import platform.AVFoundation.AVMutableComposition
@@ -25,6 +26,7 @@ import platform.posix.exit
 fun mix(
     inputFileNames: List<String>,
     outputFileName: String,
+    outputFileType: AVFileType = AVFileTypeAppleM4A,
 ) {
     val audioFiles = inputFileNames.map { NSURL.fileURLWithPath(it) }
 
@@ -52,7 +54,7 @@ fun mix(
     val outputFileURL = NSURL.fileURLWithPath(outputFileName)
     val exporter = AVAssetExportSession(asset = composition, presetName = AVAssetExportPresetAppleM4A)
     exporter.outputURL = outputFileURL
-    exporter.outputFileType = AVFileTypeAppleM4A
+    exporter.outputFileType = outputFileType
 
     exporter.exportAsynchronouslyWithCompletionHandler {
         when (exporter.status) {
