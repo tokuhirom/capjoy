@@ -18,14 +18,14 @@ class ListWindowsCommandTest {
             assert(output.contains("Window ID"))
         }
 
-
     @OptIn(ExperimentalNativeApi::class)
     @Test
-    fun testJson() = runOnLocalOnly {
-        val data = getJsonData<ListWindowsOutput>("$BINARY_PATH list-windows --format=json")
-        assert(data.windows.isNotEmpty())
-        data.windows.forEach {
-            println(it)
+    fun testJson() =
+        runOnLocalOnly {
+            val data = getJsonData<ListWindowsOutput>("$BINARY_PATH list-windows --format=json")
+            assert(data.windows.isNotEmpty())
+            data.windows.forEach {
+                println(it)
+            }
         }
-    }
 }

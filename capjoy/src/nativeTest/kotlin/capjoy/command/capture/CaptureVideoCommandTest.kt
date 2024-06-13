@@ -10,6 +10,7 @@ import kotlin.experimental.ExperimentalNativeApi
 import kotlin.test.Test
 
 class CaptureVideoCommandTest {
+    // this test case is flaky...
     @OptIn(ExperimentalNativeApi::class)
     @Test
     fun test() =
@@ -26,7 +27,7 @@ class CaptureVideoCommandTest {
             val tmpFile = createTempFile() + ".mov"
             val (exitCode, output) = runCommand(
                 "$BINARY_PATH capture-video" +
-                        " --window-id=${window.windowID} --duration 3s $tmpFile"
+                        " --window-id=${window.windowID} --duration 3s $tmpFile",
             )
             if (exitCode != 0) {
                 println("exitCode: $exitCode output: $output")

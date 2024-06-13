@@ -23,15 +23,6 @@ import platform.posix.waitpid
 
 const val BINARY_PATH = "./build/bin/native/debugExecutable/capjoy.kexe"
 
-@OptIn(ExperimentalForeignApi::class)
-fun waitForProcess(pid: Int): Int {
-    memScoped {
-        val status = alloc<IntVar>()
-        waitpid(pid, status.ptr, 0)
-        return (status.value and 0xff00) shr 8
-    }
-}
-
 class ProcessBuilder(val command: String) {
     @OptIn(ExperimentalForeignApi::class)
     fun start(enableDebugging: Boolean = false): Process {
@@ -107,10 +98,16 @@ class Process(
     private val errorOutput: StringBuilder,
 ) {
     fun readStdout(): String = output.toString()
+
     fun readStderr(): String = errorOutput.toString()
 
+    @OptIn(ExperimentalForeignApi::class)
     fun wait(): Int {
-        return waitForProcess(pid)
+        memScoped {
+            val status = alloc<IntVar>()
+            waitpid(pid, status.ptr, 0)
+            return (status.value and 0xff00) shr 8
+        }
     }
 }
 

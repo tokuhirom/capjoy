@@ -14,7 +14,6 @@ fun runOnLocalOnly(function: () -> Unit) {
     }
 }
 
-
 @OptIn(ExperimentalNativeApi::class)
 inline fun <reified T> getJsonData(cmd: String): T {
     val builder = ProcessBuilder(cmd)

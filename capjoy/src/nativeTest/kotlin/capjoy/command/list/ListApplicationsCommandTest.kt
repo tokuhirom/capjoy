@@ -21,11 +21,12 @@ class ListApplicationsCommandTest {
 
     @OptIn(ExperimentalNativeApi::class, ExperimentalForeignApi::class)
     @Test
-    fun testJson() = runOnLocalOnly {
-        val data = getJsonData<ListApplicationsOutput>("$BINARY_PATH list-applications --format=json")
-        assert(data.applications.isNotEmpty())
-        data.applications.forEach {
-            println(it)
+    fun testJson() =
+        runOnLocalOnly {
+            val data = getJsonData<ListApplicationsOutput>("$BINARY_PATH list-applications --format=json")
+            assert(data.applications.isNotEmpty())
+            data.applications.forEach {
+                println(it)
+            }
         }
-    }
 }

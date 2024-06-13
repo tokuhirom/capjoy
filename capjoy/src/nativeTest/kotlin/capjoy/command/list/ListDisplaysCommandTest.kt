@@ -20,11 +20,12 @@ class ListDisplaysCommandTest {
 
     @OptIn(ExperimentalNativeApi::class)
     @Test
-    fun testJson() = runOnLocalOnly {
-        val displays = getJsonData<ListDisplayOutput>("$BINARY_PATH list-displays --format=json")
-        assert(displays.displays.isNotEmpty())
-        displays.displays.forEach {
-            println(it)
+    fun testJson() =
+        runOnLocalOnly {
+            val displays = getJsonData<ListDisplayOutput>("$BINARY_PATH list-displays --format=json")
+            assert(displays.displays.isNotEmpty())
+            displays.displays.forEach {
+                println(it)
+            }
         }
-    }
 }
