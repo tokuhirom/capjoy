@@ -75,14 +75,18 @@ fun runCommand(command: String): Pair<Int, String> {
             while (true) {
                 val bytesRead = read(stdoutPipe[0], buffer.refTo(0), buffer.size.toULong())
                 if (bytesRead <= 0) break
-                output.append(buffer.toKString())
+                val got = buffer.toKString()
+                println(got)
+                output.append(got)
             }
             close(stdoutPipe[0])
 
             while (true) {
                 val bytesRead = read(stderrPipe[0], buffer.refTo(0), buffer.size.toULong())
                 if (bytesRead <= 0) break
-                errorOutput.append(buffer.toKString())
+                val got = buffer.toKString()
+                println(got)
+                errorOutput.append(got)
             }
             close(stderrPipe[0])
 
