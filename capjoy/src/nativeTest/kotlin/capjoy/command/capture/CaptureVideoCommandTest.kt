@@ -17,8 +17,10 @@ class CaptureVideoCommandTest {
             val windows = readWindowList()
             val filteredWindows = windows.windows.filter {
                 it.active && it.onScreen && it.owningApplication?.applicationName?.isNotEmpty() == true
-            }
-            val window = filteredWindows.maxByOrNull { it.frame.height * it.frame.width }!!
+            }.sortedByDescending { it.frame.width }
+            val window = filteredWindows.firstOrNull {
+                it.owningApplication?.bundleIdentifier == "com.google.Chrome"
+            } ?: filteredWindows.firstOrNull()!!
             println("Capturing window: $window")
 
             val tmpFile = createTempFile() + ".mov"
