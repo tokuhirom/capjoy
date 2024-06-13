@@ -4,12 +4,12 @@ import capjoy.BINARY_PATH
 import capjoy.ProcessBuilder
 import capjoy.createTempFile
 import capjoy.model.command.ListWindowsOutput
-import capjoy.runCommand
 import capjoy.runOnLocalOnly
 import capjoy.utils.getFileSize
 import kotlinx.serialization.json.Json
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 
 class CaptureVideoCommandTest {
     // this test case is flaky...
@@ -27,10 +27,15 @@ class CaptureVideoCommandTest {
             println("Capturing window: $window")
 
             val tmpFile = createTempFile() + ".mov"
-            val (exitCode, output) = runCommand(
+            val builder = ProcessBuilder(
                 "$BINARY_PATH capture-video" +
                     " --window-id=${window.windowID} --duration 3s $tmpFile",
             )
+            val process = builder.start()
+            val stdout = process.readStdout()
+            val stderr = process.readStderr()
+            val exitCode = process.waitUntil(30.seconds)
+            val output = "stdout: $stdout\nstderr: $stderr"
             if (exitCode != 0) {
                 println("exitCode: $exitCode output: $output")
             }

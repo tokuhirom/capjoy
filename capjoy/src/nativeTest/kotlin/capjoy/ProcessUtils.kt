@@ -11,6 +11,7 @@ import kotlinx.cinterop.refTo
 import kotlinx.cinterop.value
 import platform.posix.STDERR_FILENO
 import platform.posix.STDOUT_FILENO
+import platform.posix.WNOHANG
 import platform.posix.close
 import platform.posix.dup2
 import platform.posix.execlp
@@ -19,7 +20,10 @@ import platform.posix.fork
 import platform.posix.perror
 import platform.posix.pipe
 import platform.posix.read
+import platform.posix.usleep
 import platform.posix.waitpid
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 
 const val BINARY_PATH = "./build/bin/native/debugExecutable/capjoy.kexe"
 
@@ -109,7 +113,25 @@ class Process(
             return (status.value and 0xff00) shr 8
         }
     }
+
+    @OptIn(ExperimentalForeignApi::class)
+    fun waitUntil(duration: Duration): Int {
+        memScoped {
+            val startTime = TimeSource.Monotonic.markNow()
+            val status = alloc<IntVar>()
+            while (waitpid(pid, status.ptr, WNOHANG) == 0) {
+                usleep(100u * 1000u)
+                // duration 経過していたら TimeoutException を投げる
+                if (startTime.elapsedNow() > duration) {
+                    throw WaitTimeoutException("Process did not finish within the specified duration")
+                }
+            }
+            return (status.value and 0xff00) shr 8
+        }
+    }
 }
+
+class WaitTimeoutException(message: String) : Exception(message)
 
 fun runCommand(command: String): Pair<Int, String> {
     val builder = ProcessBuilder(command)

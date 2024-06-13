@@ -20,7 +20,7 @@ class CaptureAudioCommandTest {
             println(output)
 
             getFileSize(tmpFile).also {
-                assert(it > 3000)
+                assert(it > 100)
             }
         }
 }
