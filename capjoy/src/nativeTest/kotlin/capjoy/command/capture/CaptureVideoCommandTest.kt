@@ -2,9 +2,11 @@ package capjoy.command.capture
 
 import capjoy.BINARY_PATH
 import capjoy.ProcessBuilder
+import capjoy.createTempFile
 import capjoy.model.command.ListWindowsOutput
 import capjoy.runCommand
 import capjoy.runOnLocalOnly
+import capjoy.utils.getFileSize
 import kotlinx.serialization.json.Json
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.test.Test

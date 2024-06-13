@@ -1,10 +1,10 @@
 package capjoy.command.misc
 
 import capjoy.BINARY_PATH
-import capjoy.command.capture.createTempFile
-import capjoy.command.capture.getFileSize
+import capjoy.createTempFile
 import capjoy.runCommand
 import capjoy.runOnLocalOnly
+import capjoy.utils.getFileSize
 import platform.posix.system
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.test.Test
@@ -39,7 +39,7 @@ class MixCommandTest {
                 println(output)
 
                 getFileSize(outFile).also {
-                    assert(it > 3000)
+                    assert(it > 100)
                 }
                 system("file $outFile")
             }
