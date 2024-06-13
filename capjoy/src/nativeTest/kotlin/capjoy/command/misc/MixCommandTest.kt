@@ -32,7 +32,7 @@ class MixCommandTest {
                 val outFile = createTempFile() + "." + outputFormat
                 val (exitCode, output) = runCommand(
                     "$BINARY_PATH mix ${inputFiles.joinToString(" ")}" +
-                            " --format=$outputFormat -o $outFile"
+                        " --format=$outputFormat -o $outFile",
                 )
                 assert(output.contains("Mixing completed successfully"))
                 assert(exitCode == 0)
