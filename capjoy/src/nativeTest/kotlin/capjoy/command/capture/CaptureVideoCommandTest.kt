@@ -27,7 +27,7 @@ class CaptureVideoCommandTest {
             val tmpFile = createTempFile() + ".mov"
             val (exitCode, output) = runCommand(
                 "$BINARY_PATH capture-video" +
-                        " --window-id=${window.windowID} --duration 3s $tmpFile",
+                    " --window-id=${window.windowID} --duration 3s $tmpFile",
             )
             if (exitCode != 0) {
                 println("exitCode: $exitCode output: $output")
