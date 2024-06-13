@@ -1,6 +1,7 @@
 package capjoy.recorder
 
 import capjoy.eprintln
+import capjoy.utils.fileExists
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFAudio.AVEncoderBitRateKey
 import platform.AVFAudio.AVFormatIDKey
@@ -114,7 +115,11 @@ fun startScreenRecord(
     }
 
     if (!assetWriter.startWriting()) {
-        println("Failed to start writing: ${assetWriter.error?.localizedDescription}")
+        if (fileExists(fileName)) {
+            eprintln("File already exists: $fileName")
+            exit(1)
+        }
+        eprintln("Failed to start writing: ${assetWriter.error?.localizedDescription}")
         exit(1)
     }
 
