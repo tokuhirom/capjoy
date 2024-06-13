@@ -29,7 +29,7 @@ class CaptureVideoCommandTest {
             val tmpFile = createTempFile() + ".mov"
             val builder = ProcessBuilder(
                 "$BINARY_PATH capture-video" +
-                        " --window-id=${window.windowID} --duration 3s $tmpFile"
+                    " --window-id=${window.windowID} --duration 3s $tmpFile",
             )
             val process = builder.start()
             val stdout = process.readStdout()
