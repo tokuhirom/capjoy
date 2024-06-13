@@ -27,7 +27,8 @@ import platform.posix.exit
 class CaptureVideoCommand : CliktCommand(
     "Capture video and audio from the screen",
     epilog = "$WAITING_HELP\n\nDisplay capture may not work on your environemnt." +
-        " it's recommended to use window capture.",
+        " it's recommended to use window capture.\n\n" +
+        "This command is experimental and may not work as expected(Patches welcome).",
 ) {
     private val fileName: String by argument()
     private val showsCursor: Boolean by option().boolean().default(false)
