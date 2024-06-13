@@ -33,66 +33,84 @@ fun waitForProcess(pid: Int): Int {
     }
 }
 
-@OptIn(ExperimentalForeignApi::class)
-fun runCommand(command: String): Pair<Int, String> {
-    println("Running '$command'")
-    memScoped {
-        val stdoutPipe = allocArray<IntVar>(2)
-        val stderrPipe = allocArray<IntVar>(2)
+class ProcessBuilder(val command: String) {
+    @OptIn(ExperimentalForeignApi::class)
+    fun start(): Process {
+        println("Running '$command'")
+        memScoped {
+            val stdoutPipe = allocArray<IntVar>(2)
+            val stderrPipe = allocArray<IntVar>(2)
 
-        if (pipe(stdoutPipe) != 0) {
-            perror("pipe")
-            return -1 to "Failed to create stdout pipe"
-        }
-        if (pipe(stderrPipe) != 0) {
-            perror("pipe")
-            return -1 to "Failed to create stderr pipe"
-        }
-
-        val pid = fork()
-        if (pid < 0) {
-            perror("fork")
-            return -1 to "Failed to fork process"
-        } else if (pid == 0) {
-            // child process
-            close(stdoutPipe[0])
-            close(stderrPipe[0])
-            dup2(stdoutPipe[1], STDOUT_FILENO)
-            dup2(stderrPipe[1], STDERR_FILENO)
-            close(stdoutPipe[1])
-            close(stderrPipe[1])
-            execlp("/bin/sh", "sh", "-c", command, null)
-            perror("execlp")
-            exit(1)
-        } else {
-            // parent process
-            close(stdoutPipe[1])
-            close(stderrPipe[1])
-            val buffer = ByteArray(1024)
-            val output = StringBuilder()
-            val errorOutput = StringBuilder()
-
-            while (true) {
-                val bytesRead = read(stdoutPipe[0], buffer.refTo(0), buffer.size.toULong())
-                if (bytesRead <= 0) break
-                val got = buffer.toKString()
-                println(got)
-                output.append(got)
+            if (pipe(stdoutPipe) != 0) {
+                perror("pipe")
+                error("Failed to create stdout pipe")
             }
-            close(stdoutPipe[0])
-
-            while (true) {
-                val bytesRead = read(stderrPipe[0], buffer.refTo(0), buffer.size.toULong())
-                if (bytesRead <= 0) break
-                val got = buffer.toKString()
-                println(got)
-                errorOutput.append(got)
+            if (pipe(stderrPipe) != 0) {
+                perror("pipe")
+                error("Failed to create stderr pipe")
             }
-            close(stderrPipe[0])
 
-            val exitCode = waitForProcess(pid)
-            return exitCode to "stdout: $output\nstderr: $errorOutput"
+            val pid = fork()
+            if (pid < 0) {
+                perror("fork")
+                error("Failed to fork process")
+            } else if (pid == 0) {
+                // child process
+                close(stdoutPipe[0])
+                close(stderrPipe[0])
+                dup2(stdoutPipe[1], STDOUT_FILENO)
+                dup2(stderrPipe[1], STDERR_FILENO)
+                close(stdoutPipe[1])
+                close(stderrPipe[1])
+                execlp("/bin/sh", "sh", "-c", command, null)
+                perror("execlp")
+                exit(1)
+            } else {
+                // parent process
+                close(stdoutPipe[1])
+                close(stderrPipe[1])
+                val buffer = ByteArray(1024)
+                val output = StringBuilder()
+                val errorOutput = StringBuilder()
+
+                while (true) {
+                    val bytesRead = read(stdoutPipe[0], buffer.refTo(0), buffer.size.toULong())
+                    if (bytesRead <= 0) break
+                    val got = buffer.toKString()
+                    println(got)
+                    output.append(got)
+                }
+                close(stdoutPipe[0])
+
+                while (true) {
+                    val bytesRead = read(stderrPipe[0], buffer.refTo(0), buffer.size.toULong())
+                    if (bytesRead <= 0) break
+                    val got = buffer.toKString()
+                    println(got)
+                    errorOutput.append(got)
+                }
+                close(stderrPipe[0])
+
+                return Process(pid, output, errorOutput)
+            }
         }
+        error("Unreachable")
     }
-    error("Unreachable")
+}
+
+class Process(
+    private val pid: Int,
+    private val output: StringBuilder,
+    private val errorOutput: StringBuilder,
+) {
+    fun wait(): Pair<Int, String> {
+        val exitCode = waitForProcess(pid)
+        return exitCode to "stdout: $output\nstderr: $errorOutput"
+    }
+}
+
+fun runCommand(command: String): Pair<Int, String> {
+    val builder = ProcessBuilder(command)
+    val process = builder.start()
+    return process.wait()
 }
