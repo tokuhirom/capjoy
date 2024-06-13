@@ -5,6 +5,8 @@ import capjoy.model.entity.Rect
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreGraphics.CGRect
+import platform.CoreGraphics.CGRectGetHeight
+import platform.CoreGraphics.CGRectGetWidth
 import platform.ScreenCaptureKit.SCRunningApplication
 
 fun SCRunningApplication.toModel(): Application {
@@ -18,7 +20,7 @@ fun SCRunningApplication.toModel(): Application {
 @OptIn(ExperimentalForeignApi::class)
 fun CValue<CGRect>.toModel(): Rect {
     return Rect(
-        size = this.size,
-        align = this.align,
+        width = CGRectGetWidth(this),
+        height = CGRectGetHeight(this),
     )
 }
