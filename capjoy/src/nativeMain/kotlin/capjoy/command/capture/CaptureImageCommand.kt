@@ -1,9 +1,7 @@
 package capjoy.command.capture
 
 import capjoy.recorder.captureScreenshot
-import capjoy.recorder.findDefaultDisplay
-import capjoy.recorder.findDisplayByDisplayId
-import capjoy.recorder.findWindowByWindowId
+import capjoy.recorder.findTarget
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
@@ -20,11 +18,8 @@ import platform.AppKit.NSBitmapImageFileType
 import platform.AppKit.NSBitmapImageRep
 import platform.AppKit.NSImage
 import platform.AppKit.representationUsingType
-import platform.CoreGraphics.CGDirectDisplayID
-import platform.CoreGraphics.CGWindowID
 import platform.CoreMedia.CMTimeMake
 import platform.Foundation.writeToFile
-import platform.ScreenCaptureKit.SCContentFilter
 import platform.ScreenCaptureKit.SCStreamConfiguration
 import platform.posix.exit
 
@@ -49,90 +44,20 @@ class CaptureImageCommand : CliktCommand(
 
             println("Start capturing image to $fileName")
 
-            when {
-                windowID != null -> {
-                    captureWindow(windowID!!.convert(), fileName, fileType)
+            findTarget(displayID?.convert(), windowID?.convert()) { target ->
+                val configuration = SCStreamConfiguration().apply {
+                    minimumFrameInterval = CMTimeMake(value = 1, timescale = 30)
+                    showsCursor = false
                 }
-
-                displayID != null -> {
-                    captureDisplay(displayID!!.convert(), fileName, fileType)
-                }
-
-                else -> {
-                    captureDefaultDisplay(fileName, fileType)
+                captureScreenshot(target.contentFilter, configuration) { image ->
+                    println("Image saved to $fileName")
+                    saveImageToFile(image, fileName, fileType)
+                    exit(0)
                 }
             }
 
             println("Starting the main run loop to process the asynchronous callback")
             app.run()
-        }
-    }
-
-    @OptIn(ExperimentalForeignApi::class)
-    fun captureWindow(
-        windowID: CGWindowID,
-        filePath: String,
-        fileType: NSBitmapImageFileType,
-    ) {
-        findWindowByWindowId(windowID) { window ->
-            val filter = SCContentFilter(desktopIndependentWindow = window)
-            val configuration = SCStreamConfiguration().apply {
-                minimumFrameInterval = CMTimeMake(value = 1, timescale = 30)
-                showsCursor = false
-            }
-            startScreenCapture(filePath, filter, configuration, fileType)
-        }
-    }
-
-    @OptIn(ExperimentalForeignApi::class)
-    fun captureDisplay(
-        displayID: CGDirectDisplayID,
-        filePath: String,
-        fileType: NSBitmapImageFileType,
-    ) {
-        findDisplayByDisplayId(displayID.toLong()) { display, apps ->
-            val filter = SCContentFilter(
-                display = display,
-                includingApplications = apps,
-                exceptingWindows = emptyList<Any>(),
-            )
-            val configuration = SCStreamConfiguration().apply {
-                minimumFrameInterval = CMTimeMake(value = 1, timescale = 30)
-                showsCursor = false
-            }
-            startScreenCapture(filePath, filter, configuration, fileType)
-        }
-    }
-
-    @OptIn(ExperimentalForeignApi::class)
-    fun captureDefaultDisplay(
-        filePath: String,
-        fileType: NSBitmapImageFileType,
-    ) {
-        findDefaultDisplay { display, apps ->
-            val filter = SCContentFilter(
-                display = display,
-                includingApplications = apps,
-                exceptingWindows = emptyList<Any>(),
-            )
-            val configuration = SCStreamConfiguration().apply {
-                minimumFrameInterval = CMTimeMake(value = 1, timescale = 30)
-                showsCursor = false
-            }
-            startScreenCapture(filePath, filter, configuration, fileType)
-        }
-    }
-
-    private fun startScreenCapture(
-        filePath: String,
-        contentFilter: SCContentFilter,
-        scStreamConfiguration: SCStreamConfiguration,
-        fileType: NSBitmapImageFileType,
-    ) {
-        captureScreenshot(contentFilter, scStreamConfiguration) { image ->
-            println("Image saved to $filePath")
-            saveImageToFile(image, filePath, fileType)
-            exit(0)
         }
     }
 
