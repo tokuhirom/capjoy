@@ -9,6 +9,7 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.refTo
 import kotlinx.cinterop.value
+import platform.posix.SIGKILL
 import platform.posix.STDERR_FILENO
 import platform.posix.STDOUT_FILENO
 import platform.posix.WNOHANG
@@ -17,6 +18,7 @@ import platform.posix.dup2
 import platform.posix.execlp
 import platform.posix.exit
 import platform.posix.fork
+import platform.posix.kill
 import platform.posix.perror
 import platform.posix.pipe
 import platform.posix.read
@@ -109,7 +111,10 @@ class Process(
     fun wait(): Int {
         memScoped {
             val status = alloc<IntVar>()
-            waitpid(pid, status.ptr, 0)
+            if (waitpid(pid, status.ptr, 0) == -1) {
+                perror("waitpid")
+                throw WaitTimeoutException("Failed to wait for the process")
+            }
             return (status.value and 0xff00) shr 8
         }
     }
@@ -119,16 +124,29 @@ class Process(
         memScoped {
             val startTime = TimeSource.Monotonic.markNow()
             val status = alloc<IntVar>()
-            while (waitpid(pid, status.ptr, WNOHANG) == 0) {
-                usleep(100u * 1000u)
-                // duration 経過していたら TimeoutException を投げる
-                if (startTime.elapsedNow() > duration) {
-                    throw WaitTimeoutException("Process did not finish within the specified duration")
+            while (true) {
+                val waitPidResult = waitpid(pid, status.ptr, WNOHANG)
+                if (waitPidResult == -1) {
+                    perror("waitpid")
+                    throw WaitTimeoutException("Failed to wait for the process")
+                } else if (waitPidResult == 0) {
+                    usleep(100u * 1000u)
+                    if (startTime.elapsedNow() > duration) {
+                        println("Timeout! Sending SIGKILL to the process")
+                        kill(pid, SIGKILL)
+                    }
+                    continue
+                } else {
+                    return wifexited(status.value)
                 }
             }
-            return (status.value and 0xff00) shr 8
         }
+        error("Unreachable")
     }
+}
+
+private fun wifexited(value: Int): Int {
+    return (value and 0xff00) shr 8
 }
 
 class WaitTimeoutException(message: String) : Exception(message)
