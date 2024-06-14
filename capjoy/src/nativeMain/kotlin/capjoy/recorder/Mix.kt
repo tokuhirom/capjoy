@@ -1,7 +1,7 @@
 package capjoy.recorder
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import platform.AVFoundation.AVAssetExportPresetAppleM4A
+import platform.AVFoundation.AVAssetExportPresetPassthrough
 import platform.AVFoundation.AVAssetExportSession
 import platform.AVFoundation.AVAssetExportSessionStatusCancelled
 import platform.AVFoundation.AVAssetExportSessionStatusCompleted
@@ -27,6 +27,7 @@ fun mix(
     inputFileNames: List<String>,
     outputFileName: String,
     outputFileType: AVFileType = AVFileTypeAppleM4A,
+    exportPresetName: String = AVAssetExportPresetPassthrough,
 ) {
     val audioFiles = inputFileNames.map { NSURL.fileURLWithPath(it) }
 
@@ -52,7 +53,7 @@ fun mix(
     }
 
     val outputFileURL = NSURL.fileURLWithPath(outputFileName)
-    val exporter = AVAssetExportSession(asset = composition, presetName = AVAssetExportPresetAppleM4A)
+    val exporter = AVAssetExportSession(asset = composition, presetName = exportPresetName)
     exporter.outputURL = outputFileURL
     exporter.outputFileType = outputFileType
 
