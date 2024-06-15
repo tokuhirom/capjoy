@@ -13,10 +13,11 @@ import platform.AVFoundation.AVFileType
 import platform.AVFoundation.AVFileTypeMPEG4
 import platform.AVFoundation.AVFileTypeWAVE
 
-class CaptureMicCommand : CliktCommand(
-    "Capture audio from the default input device",
-    epilog = WAITING_HELP,
-) {
+class CaptureMicCommand :
+    CliktCommand(
+        "Capture audio from the default input device",
+        epilog = WAITING_HELP,
+    ) {
     private val fileName: String by argument()
     private val format by option().choice("m4a", "wav").default("m4a")
     private val duration: String? by option(help = DURATION_HELP)

@@ -18,10 +18,11 @@ import platform.ScreenCaptureKit.SCContentFilter
 import platform.ScreenCaptureKit.SCStreamConfiguration
 import platform.posix.unlink
 
-class CaptureMixCommand : CliktCommand(
-    "Capture and mix mic audio and screen audio into a single file",
-    epilog = WAITING_HELP,
-) {
+class CaptureMixCommand :
+    CliktCommand(
+        "Capture and mix mic audio and screen audio into a single file",
+        epilog = WAITING_HELP,
+    ) {
     private val outFileName: String by argument()
     private val duration: String? by option(help = DURATION_HELP)
 

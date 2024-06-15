@@ -15,6 +15,9 @@ class CaptureAudioCommandTest {
         runOnLocalOnly {
             val tmpFile = createTempFile() + ".m4a"
             val (exitCode, output) = runCommand("$BINARY_PATH capture-audio --duration 1s $tmpFile")
+            if (exitCode != 0) {
+                println("exitCode: $exitCode output: $output")
+            }
             assert(exitCode == 0)
             assert(output.contains("Capture stopped"))
             println(output)

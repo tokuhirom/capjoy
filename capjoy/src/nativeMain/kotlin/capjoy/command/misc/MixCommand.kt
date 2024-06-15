@@ -10,13 +10,15 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.choice
 import platform.AVFoundation.AVFileTypeAppleM4A
 
-class MixCommand : CliktCommand(
-    "Mix audio files",
-) {
+class MixCommand :
+    CliktCommand(
+        "Mix audio files",
+    ) {
     private val outputFile: String by option("-o", "--output", help = "Output file").required()
     private val inputFiles: List<String> by argument().multiple()
     private val outputFileType: String by option("-f", "--format", help = "Output file type")
-        .choice("m4a").default("m4a")
+        .choice("m4a")
+        .default("m4a")
 
     override fun run() {
         val avFileType = when (outputFileType) {
