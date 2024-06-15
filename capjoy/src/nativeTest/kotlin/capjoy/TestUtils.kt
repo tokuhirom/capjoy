@@ -18,8 +18,8 @@ fun runOnLocalOnly(function: () -> Unit) {
 inline fun <reified T> getJsonData(cmd: String): T {
     val builder = ProcessBuilder(cmd)
     val process = builder.start()
-    val stdout = process.readStdout()
-    val stderr = process.readStderr()
+    val stdout = process.stdout!!.slurpString()
+    val stderr = process.stderr?.slurpString()
     val exitCode = process.wait()
     println(stderr)
     assert(exitCode == 0)

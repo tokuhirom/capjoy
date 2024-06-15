@@ -29,7 +29,9 @@ import kotlin.time.TimeSource
 
 const val BINARY_PATH = "./build/bin/native/debugExecutable/capjoy.kexe"
 
-class ProcessBuilder(val command: String) {
+class ProcessBuilder(
+    val command: String,
+) {
     @OptIn(ExperimentalForeignApi::class)
     fun start(enableDebugging: Boolean = false): Process {
         println("Running '$command'")
@@ -65,33 +67,8 @@ class ProcessBuilder(val command: String) {
                 // parent process
                 close(stdoutPipe[1])
                 close(stderrPipe[1])
-                val buffer = ByteArray(1024)
-                val output = StringBuilder()
-                val errorOutput = StringBuilder()
 
-                while (true) {
-                    val bytesRead = read(stdoutPipe[0], buffer.refTo(0), buffer.size.toULong())
-                    if (bytesRead <= 0) break
-                    val got = buffer.decodeToString(0, bytesRead.toInt())
-                    if (enableDebugging) {
-                        println(got)
-                    }
-                    output.append(got)
-                }
-                close(stdoutPipe[0])
-
-                while (true) {
-                    val bytesRead = read(stderrPipe[0], buffer.refTo(0), buffer.size.toULong())
-                    if (bytesRead <= 0) break
-                    val got = buffer.decodeToString(0, bytesRead.toInt())
-                    if (enableDebugging) {
-                        println(got)
-                    }
-                    errorOutput.append(got)
-                }
-                close(stderrPipe[0])
-
-                return Process(pid, output, errorOutput)
+                return Process(pid, FileDescriptor(stdoutPipe[0]), FileDescriptor(stderrPipe[0]))
             }
         }
         error("Unreachable")
@@ -100,13 +77,9 @@ class ProcessBuilder(val command: String) {
 
 class Process(
     private val pid: Int,
-    private val output: StringBuilder,
-    private val errorOutput: StringBuilder,
+    val stdout: FileDescriptor?,
+    val stderr: FileDescriptor?,
 ) {
-    fun readStdout(): String = output.toString()
-
-    fun readStderr(): String = errorOutput.toString()
-
     @OptIn(ExperimentalForeignApi::class)
     fun wait(): Int {
         memScoped {
@@ -115,7 +88,7 @@ class Process(
                 perror("waitpid")
                 throw WaitTimeoutException("Failed to wait for the process")
             }
-            return (status.value and 0xff00) shr 8
+            return wifexited(status.value)
         }
     }
 
@@ -143,19 +116,43 @@ class Process(
         }
         error("Unreachable")
     }
+
+    private fun wifexited(value: Int): Int = (value and 0xff00) shr 8
 }
 
-private fun wifexited(value: Int): Int {
-    return (value and 0xff00) shr 8
+class FileDescriptor(
+    private val fd: Int,
+) {
+    @OptIn(ExperimentalForeignApi::class)
+    fun slurpString(): String {
+        memScoped {
+            val buffer = ByteArray(1024)
+            val output = StringBuilder()
+            while (true) {
+                val bytesRead = read(fd, buffer.refTo(0), buffer.size.toULong())
+                if (bytesRead <= 0) break
+                val got = buffer.decodeToString(0, bytesRead.toInt())
+                output.append(got)
+            }
+            close(fd)
+            return output.toString()
+        }
+    }
+
+    fun close() {
+        close(fd)
+    }
 }
 
-class WaitTimeoutException(message: String) : Exception(message)
+class WaitTimeoutException(
+    message: String,
+) : Exception(message)
 
 fun runCommand(command: String): Pair<Int, String> {
     val builder = ProcessBuilder(command)
     val process = builder.start()
-    val stdout = process.readStdout()
-    val stderr = process.readStderr()
+    val stdout = process.stdout!!.slurpString()
+    val stderr = process.stderr!!.slurpString()
     val exitCode = process.wait()
     return exitCode to "stdout: $stdout\nstderr: $stderr"
 }
