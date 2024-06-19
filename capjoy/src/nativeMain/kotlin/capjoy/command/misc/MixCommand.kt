@@ -8,7 +8,10 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.choice
+import kotlinx.coroutines.runBlocking
 import platform.AVFoundation.AVFileTypeAppleM4A
+import platform.Foundation.NSRunLoop
+import platform.Foundation.run
 
 class MixCommand :
     CliktCommand(
@@ -20,12 +23,15 @@ class MixCommand :
         .choice("m4a")
         .default("m4a")
 
-    override fun run() {
-        val avFileType = when (outputFileType) {
-            "m4a" -> AVFileTypeAppleM4A
-            else -> error("Unsupported format: $outputFileType")
-        }
+    override fun run() =
+        runBlocking {
+            val avFileType = when (outputFileType) {
+                "m4a" -> AVFileTypeAppleM4A
+                else -> error("Unsupported format: $outputFileType")
+            }
 
-        mix(inputFiles, outputFile, avFileType)
-    }
+            mix(inputFiles, outputFile, avFileType)
+
+            NSRunLoop.mainRunLoop().run()
+        }
 }

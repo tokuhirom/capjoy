@@ -34,6 +34,9 @@ import platform.ScreenCaptureKit.SCStreamOutputProtocol
 import platform.ScreenCaptureKit.SCStreamOutputType
 import platform.darwin.NSObject
 import platform.posix.exit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 @OptIn(ExperimentalForeignApi::class)
 fun createAssetWriter(
@@ -83,14 +86,13 @@ fun createVideoWriterInput(): AVAssetWriterInput {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-fun startScreenRecord(
+suspend fun startScreenRecord(
     fileName: String,
     contentFilter: SCContentFilter,
     enableVideo: Boolean,
     enableAudio: Boolean,
     scStreamConfiguration: SCStreamConfiguration,
-    callback: (ScreenRecorder) -> Unit,
-) {
+): ScreenRecorder {
     val stream = SCStream(contentFilter, scStreamConfiguration, null)
 
     val assetWriter = createAssetWriter(fileName, enableVideo)
@@ -180,15 +182,9 @@ fun startScreenRecord(
         )
     }
 
-    stream.startCaptureWithCompletionHandler { error ->
-        if (error != null) {
-            println("Failed to start capture: ${error.localizedDescription}")
-            exit(1)
-        } else {
-            println("Capture started successfully")
-            callback(ScreenRecorder(stream, audioWriterInput, videoWriterInput, assetWriter))
-        }
-    }
+    stream.startCapture()
+    println("Capture started successfully")
+    return ScreenRecorder(stream, audioWriterInput, videoWriterInput, assetWriter)
 }
 
 data class ScreenRecorder(
@@ -198,23 +194,35 @@ data class ScreenRecorder(
     val assetWriter: AVAssetWriter,
 ) {
     @OptIn(ExperimentalForeignApi::class)
-    fun stop(callback: () -> Unit) {
-        stream.stopCaptureWithCompletionHandler { error ->
+    suspend fun stop() {
+        stream.stopCapture()
+
+        println("Capture stopped")
+
+        val hostTimeClock = CMClockGetHostTimeClock()
+        val now = CMClockGetTime(hostTimeClock)
+        assetWriter.endSessionAtSourceTime(now)
+
+        audioWriterInput?.markAsFinished()
+        videoWriterInput?.markAsFinished()
+        assetWriter.finishWriting()
+    }
+}
+
+suspend fun SCStream.stopCapture() =
+    suspendCoroutine { cont ->
+        this.stopCaptureWithCompletionHandler { error ->
             if (error != null) {
-                println("Failed to stop capture: ${error.localizedDescription}")
+                cont.resumeWithException(Exception("Failed to stop capture: ${error.localizedDescription}"))
             } else {
-                println("Capture stopped")
-
-                val hostTimeClock = CMClockGetHostTimeClock()
-                val now = CMClockGetTime(hostTimeClock)
-                assetWriter.endSessionAtSourceTime(now)
-
-                audioWriterInput?.markAsFinished()
-                videoWriterInput?.markAsFinished()
-                assetWriter.finishWritingWithCompletionHandler {
-                    callback()
-                }
+                cont.resume(Unit)
             }
         }
     }
-}
+
+suspend fun AVAssetWriter.finishWriting() =
+    suspendCoroutine { cont ->
+        this.finishWritingWithCompletionHandler {
+            cont.resume(Unit)
+        }
+    }
