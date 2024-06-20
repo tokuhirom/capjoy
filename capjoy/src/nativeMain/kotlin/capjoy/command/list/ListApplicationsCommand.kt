@@ -1,21 +1,23 @@
 package capjoy.command.list
 
 import capjoy.command.list.utils.showTable
-import capjoy.handleContent
 import capjoy.model.command.ListApplicationsOutput
+import capjoy.recorder.getSharableContent
 import capjoy.toModel
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
 import kotlinx.cinterop.BetaInteropApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import platform.ScreenCaptureKit.SCRunningApplication
 
-class ListApplicationsCommand : CliktCommand(
-    "List all running applications",
-) {
+class ListApplicationsCommand :
+    CliktCommand(
+        "List all running applications",
+    ) {
     private val format by option().choice("json", "table").default("table")
     private val json =
         Json {
@@ -23,14 +25,17 @@ class ListApplicationsCommand : CliktCommand(
         }
 
     @BetaInteropApi
-    override fun run() {
-        handleContent { content ->
+    override fun run() =
+        runBlocking {
+            val content = getSharableContent()
+
             val got =
-                content.applications.map { application ->
-                    application as SCRunningApplication
-                }.map {
-                    it.toModel()
-                }
+                content.applications
+                    .map { application ->
+                        application as SCRunningApplication
+                    }.map {
+                        it.toModel()
+                    }
             when (format) {
                 "json" -> println(json.encodeToString(ListApplicationsOutput(got)))
                 "table" -> {
@@ -50,5 +55,4 @@ class ListApplicationsCommand : CliktCommand(
                 }
             }
         }
-    }
 }

@@ -1,7 +1,8 @@
 package capjoy.command.capture
 
 import capjoy.createTempFile
-import capjoy.recorder.findDefaultDisplay
+import capjoy.recorder.defaultDisplay
+import capjoy.recorder.getSharableContent
 import capjoy.recorder.mix
 import capjoy.recorder.startAudioRecording
 import capjoy.recorder.startScreenRecord
@@ -11,6 +12,8 @@ import capjoy.utils.waitProcessing
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.option
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.coroutines.runBlocking
 import platform.AVFoundation.AVFileTypeMPEG4
 import platform.Foundation.NSRunLoop
 import platform.Foundation.run
@@ -26,49 +29,53 @@ class CaptureMixCommand :
     private val outFileName: String by argument()
     private val duration: String? by option(help = DURATION_HELP)
 
+    @OptIn(BetaInteropApi::class)
     override fun run() {
-        val micFile = createTempFile("capjoy-mix-mic-", ".m4a")
-        val screenFile = createTempFile("capjoy-mix-screen-", ".m4a")
+        runBlocking {
+            val micFile = createTempFile("capjoy-mix-mic-", ".m4a")
+            val screenFile = createTempFile("capjoy-mix-screen-", ".m4a")
 
-        println("Recording audio and screen to $micFile and $screenFile ...")
+            println("Recording audio and screen to $micFile and $screenFile ...")
 
-        val micRecorder = startAudioRecording(AVFileTypeMPEG4, micFile)
-        println("Started micRecorder...")
-        findDefaultDisplay { display, _ ->
+            val micRecorder = startAudioRecording(AVFileTypeMPEG4, micFile)
+            println("Started micRecorder...")
+
+            val content = getSharableContent()
+            val display = content.defaultDisplay()
             println("Display found: $display")
 
+            // 逆にここかも??
             val contentFilter = SCContentFilter(
                 display,
-                excludingWindows = emptyList<Any>(),
+                includingApplications = content.applications,
+                exceptingWindows = emptyList<Any>(),
             )
             val captureConfiguration = SCStreamConfiguration().apply {
                 capturesAudio = true
             }
-            startScreenRecord(
+            val screenRecorder = startScreenRecord(
                 screenFile,
                 contentFilter,
                 enableVideo = false,
                 enableAudio = true,
                 captureConfiguration,
-            ) { screenRecorder ->
-                waitProcessing(duration)
+            )
 
-                micRecorder.stop()
+            waitProcessing(duration)
 
-                screenRecorder.stop {
-                    println("Writing finished")
+            micRecorder.stop()
 
-                    println("Starting mix...")
+            screenRecorder.stop()
 
-                    mix(listOf(micFile, screenFile), outFileName)
+            println("Starting mix from $micFile and $screenFile to $outFileName...")
+            mix(listOf(micFile, screenFile), outFileName)
 
-                    println("Created mix file: $outFileName")
+            println("Created mix file: $outFileName")
 
-                    unlink(micFile)
-                    unlink(screenFile)
-                }
-            }
+            unlink(micFile)
+            unlink(screenFile)
+
+            NSRunLoop.mainRunLoop().run()
         }
-        NSRunLoop.mainRunLoop().run()
     }
 }

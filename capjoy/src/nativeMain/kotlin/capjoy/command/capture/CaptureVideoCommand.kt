@@ -12,10 +12,9 @@ import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.boolean
 import com.github.ajalt.clikt.parameters.types.uint
-import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.autoreleasepool
 import kotlinx.cinterop.memScoped
+import kotlinx.coroutines.runBlocking
 import platform.AppKit.NSApplication
 import platform.AppKit.NSApplicationActivationPolicy
 import platform.CoreMedia.CMTimeMake
@@ -38,49 +37,45 @@ class CaptureVideoCommand :
     private val windowID: UInt? by option().uint()
     private val duration: String? by option(help = DURATION_HELP)
 
-    @OptIn(BetaInteropApi::class)
-    override fun run() {
-        autoreleasepool {
+    override fun run() =
+        runBlocking {
             val app = NSApplication.sharedApplication()
             app.setActivationPolicy(NSApplicationActivationPolicy.NSApplicationActivationPolicyRegular)
 
             memScoped {
-                findTarget(displayID, windowID) { target ->
-                    val optShowsCursor = showsCursor
-                    val configuration = SCStreamConfiguration().apply {
-                        println("Configuring SCStreamConfiguration(showsCursor=$optShowsCursor)...")
-                        this.showsCursor = optShowsCursor
-                        capturesAudio = audio
-                        minimumFrameInterval = CMTimeMake(value = 1, timescale = 30) // 30 FPS
-                        width = target.width
-                        height = target.height
-                    }
-                    recordVideo(target.contentFilter, configuration)
+                val target = findTarget(displayID, windowID)
+                val optShowsCursor = showsCursor
+                val configuration = SCStreamConfiguration().apply {
+                    println("Configuring SCStreamConfiguration(showsCursor=$optShowsCursor)...")
+                    this.showsCursor = optShowsCursor
+                    capturesAudio = audio
+                    minimumFrameInterval = CMTimeMake(value = 1, timescale = 30) // 30 FPS
+                    width = target.width
+                    height = target.height
                 }
+                recordVideo(target.contentFilter, configuration)
             }
 
             // Run the main run loop to process the asynchronous callback
             app.run()
         }
-    }
 
-    private fun recordVideo(
+    private suspend fun recordVideo(
         contentFilter: SCContentFilter,
         captureConfiguration: SCStreamConfiguration,
     ) {
-        startScreenRecord(
+        val screenRecorder = startScreenRecord(
             fileName,
             contentFilter,
             enableVideo = true,
             enableAudio = audio,
             captureConfiguration,
-        ) { screenRecorder ->
-            waitProcessing(duration)
+        )
+        waitProcessing(duration)
 
-            screenRecorder.stop {
-                println("Writing finished: $fileName")
-                exit(0)
-            }
-        }
+        screenRecorder.stop()
+
+        println("Writing finished: $fileName")
+        exit(0)
     }
 }

@@ -15,9 +15,12 @@ import platform.ScreenCaptureKit.SCStreamConfiguration
 import platform.ScreenCaptureKit.SCStreamOutputProtocol
 import platform.ScreenCaptureKit.SCStreamOutputType
 import platform.darwin.NSObject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 @OptIn(ExperimentalForeignApi::class)
-fun captureScreenshot(
+suspend fun captureScreenshot(
     contentFilter: SCContentFilter,
     scStreamConfiguration: SCStreamConfiguration,
     callback: (NSImage) -> Unit,
@@ -60,11 +63,16 @@ fun captureScreenshot(
         error = null,
     )
 
-    stream.startCaptureWithCompletionHandler { error ->
-        if (error != null) {
-            println("Failed to start capture: ${error.localizedDescription}")
-        } else {
-            println("Capture started successfully")
+    stream.startCapture()
+}
+
+suspend fun SCStream.startCapture() =
+    suspendCoroutine { cont ->
+        this.startCaptureWithCompletionHandler { error ->
+            if (error != null) {
+                cont.resumeWithException(Exception("Failed to start capture: ${error.localizedDescription}"))
+            } else {
+                cont.resume(Unit)
+            }
         }
     }
-}

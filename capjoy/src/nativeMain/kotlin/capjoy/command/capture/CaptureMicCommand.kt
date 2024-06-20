@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
+import kotlinx.coroutines.runBlocking
 import platform.AVFoundation.AVFileType
 import platform.AVFoundation.AVFileTypeMPEG4
 import platform.AVFoundation.AVFileTypeWAVE
@@ -22,18 +23,21 @@ class CaptureMicCommand :
     private val format by option().choice("m4a", "wav").default("m4a")
     private val duration: String? by option(help = DURATION_HELP)
 
-    override fun run() {
-        val outFormat: AVFileType? =
-            when (format) {
-                "m4a" -> AVFileTypeMPEG4
-                "wav" -> AVFileTypeWAVE
-                else -> error("Unsupported format: $format")
-            }
+    override fun run() =
+        runBlocking {
+            val outFormat: AVFileType =
+                when (format) {
+                    "m4a" -> AVFileTypeMPEG4
+                    "wav" -> AVFileTypeWAVE
+                    else -> error("Unsupported format: $format")
+                }
 
-        val recorder = startAudioRecording(outFormat, fileName)
+            val recorder = startAudioRecording(outFormat, fileName)
 
-        waitProcessing(duration)
+            waitProcessing(duration)
 
-        recorder.stop()
-    }
+            recorder.stop()
+
+            println("Wrote audio to $fileName")
+        }
 }
