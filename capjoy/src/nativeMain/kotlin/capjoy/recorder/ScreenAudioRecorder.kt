@@ -205,7 +205,7 @@ data class ScreenRecorder(
 
         audioWriterInput?.markAsFinished()
         videoWriterInput?.markAsFinished()
-        assetWriter.finishWriting()
+        assetWriter.finishWritingAsync()
     }
 }
 
@@ -220,7 +220,7 @@ suspend fun SCStream.stopCapture() =
         }
     }
 
-suspend fun AVAssetWriter.finishWriting() =
+suspend fun AVAssetWriter.finishWritingAsync() =
     suspendCoroutine { cont ->
         this.finishWritingWithCompletionHandler {
             cont.resume(Unit)
