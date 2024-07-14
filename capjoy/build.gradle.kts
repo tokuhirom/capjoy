@@ -30,6 +30,9 @@ tasks.register<Exec>("runDebug") {
     val arguments = project.findProperty("execArgs")?.toString()?.split(" ") ?: listOf()
     args(arguments)
     environment("CAPJOY_GRADLE_RUN_DEBUG", "true")
-    executable = file("$buildDir/bin/native/debugExecutable/capjoy.kexe").absolutePath
+    executable = layout.buildDirectory
+        .file("bin/native/debugExecutable/capjoy.kexe")
+        .get()
+        .asFile.absolutePath
     standardInput = System.`in`
 }
