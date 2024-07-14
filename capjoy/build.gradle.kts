@@ -17,7 +17,6 @@ kotlin {
             dependencies {
                 implementation("com.github.ajalt.clikt:clikt:4.4.0")
                 implementation(project(":capjoy-model"))
-                implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.5.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
             }
         }
