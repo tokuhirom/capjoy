@@ -15,7 +15,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("com.github.ajalt.clikt:clikt:4.4.0")
+                implementation("com.github.ajalt.clikt:clikt:5.0.2")
                 implementation(project(":capjoy-model"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             }
